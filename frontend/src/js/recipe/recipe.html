@@ -1,0 +1,51 @@
+<div class="home-page">
+
+  <!-- Splash banner that only shows when not logged in -->
+  <div class="banner">
+    <div class="container">
+      <h1 class="logo-font" ng-bind="::title"></h1>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12 no-padding">
+        <form class="" role="search">
+          <div class="form-group searchbar" role="search">
+            <input type="text" class="form-control" id="searchBar" placeholder="Search Recipe"
+            autocomplete="off"
+            ng-model="$ctrl.searchbar"
+            auto-complete
+            value="$ctrl.searchbar"
+            keyup="$ctrl.autoComplete(filter)"
+            list="$ctrl.autoList">
+            <ul class="smart-list" id="smartList">
+            </ul>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="row">
+      <div class="media" ng-repeat="recipe in $ctrl.recipes">
+        <div class="media-body">
+          <h4 class="media-heading" ng-bind="::recipe.title"></h4>
+          {{ recipe.body | limitTo: 500 }}
+        </div>
+
+        <div class="btn-group full" role="group">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Ingredients
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li ng-repeat="ingredient in recipe.ingredients">
+              <a href="#">{{ingredient}}</a>
+            </li>
+          </ul>
+          <a ui-sref="/recipes/{{recipe.slug}}">
+            <button type="submit" class="btn btn-primary  btn-read">Read</button>
+          </a>
+        </div>
+    </div>
+  </div>
+</div>
