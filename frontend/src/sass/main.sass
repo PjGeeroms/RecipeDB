@@ -83,7 +83,7 @@ body
 
 #authentication
   display: block
-  width: 40%
+  //width: 40%
 
   @media screen and (max-width: 770px)
     width: 90%
@@ -147,9 +147,30 @@ body
     text-transform: uppercase
     font-family: "Raleway", "Roboto", sans-serif
     font-weight: 600
+    transition: color 0.4s ease
 
-    &:last-of-type
-      padding-right: 0
+    &.special
+      background: $editorBlack !important
+      color: $color-mediumWhite
+      padding-left: 17px
+      padding-right: 17px
+      font-weight: 700
+      font-size: 24px
+      transition: all 1s ease
+      margin-left: 1em
+
+      span
+        display: none
+
+      @media screen and (max-width: 770px)
+        margin-left: 0
+        font-size: 14px
+        span
+          display: inline
+
+      &:hover
+        background-color: $color-veryLightGray !important
+        color: $editorBlack !important
 
     &.active, &:hover
       color: $editorBlack
@@ -407,7 +428,7 @@ body
           left: 0
 
   .wrapper
-    max-width: 770px
+    max-width: 660px
     position: relative
     margin: 0 auto
     height: 100%

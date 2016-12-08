@@ -17,7 +17,7 @@
         <a class="nav-link"
           ui-sref-active="active"
           ui-sref="app.recipe">
-          <i class="ion-clipboard"></i>
+          <i class="ion-android-list"></i>
           &nbsp;Recipes
         </a>
       </li>
@@ -26,55 +26,36 @@
         <a class="nav-link"
           ui-sref-active="active"
           ui-sref="app.editor">
-          <i class="ion-compose"></i>
+          <i class="ion-android-document"></i>
           &nbsp;Add recipe
         </a>
       </li>
 
-      <li role="presentation" class="dropdown nav-item">
-        <a class="dropdown-toggle nav-link"
-          data-toggle="dropdown"
-          role="button"
-          aria-haspopup="true"
-          aria-expanded="false">
-
-          <i class="ion-ios-gear"></i>
-          &nbsp;Settings <span class="caret"></span>
+      <li class="nav-item">
+        <a class="nav-link special"
+          ui-sref-active="active"
+          ui-sref="app.login"
+          ng-click="$ctrl.logout()">
+          <i class="ion-android-exit"></i>
+          <span>Logout</span>
         </a>
-
-        <ul class="dropdown-menu">
-          <li class="nav-item">
-            <a class="nav-link"
-              ui-sref-active="active"
-              ui-sref="app.login"
-              ng-click="$ctrl.logout()">
-              <i class="ion-log-out"></i>
-              &nbsp;Logout
-            </a>
-          </li>
-
-        </ul>
       </li>
     </ul>
 
     <!-- Show when logged out -->
     <ul id="navBar" class="nav navbar-nav pull-xs-right" show-authed="false">
 
-      <li class="nav-item">
-        <a class="nav-link"
-          ui-sref-active="active"
+      <li class="nav-item" ng-hide="$ctrl.state == 'register'">
+        <a class="nav-link special"
           ui-sref="app.register">
           <i class="ion-person-add"></i>
-          &nbsp;Sign up
         </a>
       </li>
 
-      <li class="nav-item">
-        <a class="nav-link"
-          ui-sref-active="active"
+      <li class="nav-item" ng-hide="$ctrl.state == 'login'">
+        <a class="nav-link special"
           ui-sref="app.login">
-          <i class="ion-log-in"></i>
-          &nbsp;Login
+          <i class="ion-android-exit"></i>
         </a>
       </li>
     </ul>
