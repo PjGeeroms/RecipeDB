@@ -7,6 +7,7 @@ export default class RecipeController {
     this.recipes = recipes;
     this.searchbar = "";
     this.autoList = [];
+    
   }
 
   autoComplete(filter) {

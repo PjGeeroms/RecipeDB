@@ -2,20 +2,16 @@
   <div class="container">
 
     <a class="navbar-brand"
-      ui-sref="app.home"
+      ui-sref="app.recipe"
       ng-bind="::$ctrl.appName | lowercase">
     </a>
 
+    <div id="mobileMenu" class="pull-xs-right hidden">
+      <i class="ion-navicon-round"></i>
+    </div>
+
     <!-- Show this for logged in users -->
-    <ul class="nav navbar-nav pull-xs-right" show-authed="true">
-      <li class="nav-item">
-        <a class="nav-link"
-          ui-sref-active="active"
-          ui-sref="app.home">
-          <i class="ion-ios-home"></i>
-          &nbsp;Home
-        </a>
-      </li>
+    <ul id="navBar" class="nav navbar-nav pull-xs-right" show-authed="true">
 
       <li class="nav-item">
         <a class="nav-link"
@@ -50,15 +46,6 @@
           <li class="nav-item">
             <a class="nav-link"
               ui-sref-active="active"
-              ui-sref="app.settings">
-              <i class="ion-ios-gear"></i>
-              &nbsp;Settings
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link"
-              ui-sref-active="active"
               ui-sref="app.login"
               ng-click="$ctrl.logout()">
               <i class="ion-log-out"></i>
@@ -71,22 +58,14 @@
     </ul>
 
     <!-- Show when logged out -->
-    <ul class="nav navbar-nav pull-xs-right" show-authed="false">
-      <li class="nav-item">
-        <a class="nav-link"
-          ui-sref-active="active"
-          ui-sref="app.home">
-          <i class="ion-ios-home"></i>
-          &nbsp;Home
-        </a>
-      </li>
+    <ul id="navBar" class="nav navbar-nav pull-xs-right" show-authed="false">
 
       <li class="nav-item">
         <a class="nav-link"
           ui-sref-active="active"
-          ui-sref="app.recipe">
-          <i class="ion-clipboard"></i>
-          &nbsp;Recipes
+          ui-sref="app.register">
+          <i class="ion-person-add"></i>
+          &nbsp;Sign up
         </a>
       </li>
 

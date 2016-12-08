@@ -23,7 +23,11 @@ export default function AutoComplete($compile) {
 
           var listNode = $compile(
             `
-              <li ng-repeat="item in list" class="item">{{item.title}}</li>
+              <li ng-repeat="item in list" class="item">
+                <a href="/#/recipes/{{item.slug}}">
+                  {{item.title}}
+                </a>
+              </li>
             `
           )(scope);
 

@@ -13,6 +13,17 @@ function AuthConfig($stateProvider, $httpProvider) {
         return User.ensureAuthIs(false);
       }
     }
+  })
+  .state('app.register', {
+    url: '/register',
+    controller: 'AuthController as $ctrl',
+    templateUrl: 'auth/register.html',
+    title: 'Register',
+    resolve: {
+      auth: function(User) {
+        return User.ensureAuthIs(false);
+      }
+    }
   });
 }
 

@@ -34,14 +34,16 @@ router.put('/user', auth.required, function(req, res, next){
 });
 
 router.post('/users/login', function(req, res, next){
-  console.log('Into method:');
-  console.log(req.body.user);
+  if(!(req.body.user.email) && !(req.body.user.password)){
+    return res.status(422).json({errors: {email: "cannot be blank", password: "cannot be blank"}});
+  }
+
   if(!req.body.user.email){
-    return res.status(422).json({errors: {email: "can't be blank"}});
+    return res.status(422).json({errors: {email: "cannot be blank"}});
   }
 
   if(!req.body.user.password){
-    return res.status(422).json({errors: {password: "can't be blank"}});
+    return res.status(422).json({errors: {password: "cannot be blank"}});
   }
 
   passport.authenticate('local', {session: false}, function(err, user, info){

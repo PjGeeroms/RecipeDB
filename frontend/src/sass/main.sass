@@ -1,8 +1,34 @@
 @import "colors"
 
+.cf
+  &:after
+    content: ""
+    display: table
+    clear: both
+
+.error
+  color: $color-red
+  font-size: 14px
+  text-shadow: 0 0 0
+  font-family: "Raleway", "Roboto", sans-serif
+  display: inline-block
+
+
+::selection
+  background: transparentize($color-mediumGray, 0.5) /* WebKit/Blink Browsers */
+
+::-moz-selection
+  background: transparentize($color-mediumGray, 0.5) /* Gecko Browsers */
+
 /**
 /*  General
 /**
+
+.hidden
+  display: none
+
+.showing
+  display: block
 
 html
   position: relative
@@ -35,13 +61,75 @@ body
 .container
   &.page
     margin-top: 1.5rem
+    overflow: hidden
+
+/**
+/*  Authentication
+/**
+.form-header
+  text-transform: uppercase
+  margin-bottom: 4rem
+  color: $color-darkGray
+
+.login-center
+  display: flex
+  flex-direction: row
+  flex-wrap: nowrap
+  align-items: center
+  align-content: center
+  justify-content: center
+  width: 100%
+  height: 75vh
+
+#authentication
+  display: block
+  width: 40%
+
+  @media screen and (max-width: 770px)
+    width: 90%
+
+  input
+    position: relative
+    outline: none !important
+    border: none
+    background-color: $color-veryLightGray
+    line-height: 24px
+    padding: 10px 15px
+    min-width: 320px
+    color: $color-darkGray
+    width: 100%
+    margin-bottom: 1rem
+    font-family: "Raleway", "Roboto", sans-serif
+    font-size: 16px
+
+  .btn
+    border-radius: 0
+    background: $editorBlack !important
+    color: $editorListItemAlt !important
+    text-transform: uppercase
+    font-size: 14px
+    font-family: "Raleway", "Roboto", sans-serif
+    font-weight: 600
+
 
 /**
 /*  Navigation bar
 /**
 
+#mobileMenu
+  line-height: 50px
+  font-size: 2rem
+  cursor: pointer
+
+.nav
+  margin-right: -15px
+
+  @media screen and (max-width: 770px)
+    margin-right: 0
+
 .navbar
   margin-bottom: 0
+  //background: #eee
 
   .navbar-brand
     font-family: "Titillium Web", sans-serif
@@ -49,97 +137,37 @@ body
     margin-right: 2rem !important
     color: $name !important
     float: left
+    padding: 15px 15px 0  0
 
 
   .nav-link
-    color: rgba(0, 0, 0, 0.3)
+    color: #aaa
     background: none !important
-    font-size: 16px
+    font-size: 14px
+    text-transform: uppercase
+    font-family: "Raleway", "Roboto", sans-serif
+    font-weight: 600
+
+    &:last-of-type
+      padding-right: 0
 
     &.active, &:hover
-      color: $navigationActive
+      color: $editorBlack
 
 .no-padding
   padding: 0
 
-.recipes-grid
-  display: flex
-  flex-direction: row
-  flex-wrap: wrap
-  justify-content: flex-start
-  align-items: flex-start
-  align-content: flex-start
-  box-sizing: border-box
+  @media screen and (max-width: 770px)
+    padding: 15px
 
-  .recipes
-    box-sizing: border-box
-    display: block
-    position: relative
-    width: 33.333333%
-    height: calc(100vh - 600px)
-    padding: 50px
-    background-position: 50% 50%
-    background-size: cover
-    float: left
 
-    &::before
-      content: " "
-      width: 100%
-      height: 100%
-      background-color: transparent
-      background-image: linear-gradient(180deg, transparent 60%, transparentize($color-black, 0.4))
-      position: absolute
-      top: 0
-      left: 0
+/**
+/*  Page
+/**
 
-    .recipe-info
-      display: block
-      position: absolute
-      width: 100%
-      bottom: 5px
-      left: 0
-      padding: 0 0 0 10px
-
-      h4
-        display: inline-block
-        color: $color-white
-        font-size: 18px
-        text-shadow: 0px 2px 5px transparentize($color-black, 0.4)
-        font-weight: 400
-        width: 100%
-        text-overflow: ellipsis
-        overflow: hidden
-
-      p
-        color: $color-white
-        margin: 0
-        font-weight: 600
-
-      .recipe-ingredients
-        list-style: none
-        padding: 0
-
-        li
-          float: left
-          color: $color-white
-          padding: 0 5px 0px 0
-          text-shadow: 0px 2px 5px transparentize($color-black, 0.4)
-          line-height: 0.8rem
-          margin: 0 0 5px
-
-          &:first-of-type
-            float: left
-            clear: both
-
-          &:first-of-type::after
-            content: " "
-
-          &:last-of-type::after
-            content: " "
-
-          &::after
-            content: ","
-
+.home-page
+  margin-top: 2rem
+  overflow: hidden
 
 /**
 /*  Media
@@ -156,8 +184,359 @@ body
 
 
 /**
+/*  Recipe Detail
+/**
+
+.recipe-detail
+  width: 100%
+  height: auto
+  overflow: visible
+  position: static
+
+  .custom
+    width: 92%
+    color: $editorBlack
+    box-sizing: border-box
+    padding: 15px
+    margin-left: 50px
+    margin-bottom: 0 !important
+
+    @media screen and (max-width: 770px)
+      width: 85%
+
+  .recipe-instructions
+    h3
+      font-size: 2.5rem
+      margin-top: 1.5em !important
+      margin-bottom: 0.8333 !important
+      text-transform: capitalize
+      font-weight: 700
+      line-height: 1.5
+      color: $editorBlack
+    .prep-steps
+      counter-reset: step
+
+      .step-wrapper
+        &:nth-child(odd)
+          background-color: $editorListItem
+        &:nth-child(even)
+          background-color: $editorListItemAlt
+
+        -webkit-backface-visibility: hidden
+        -moz-backface-visibility: hidden
+        -ms-backface-visibility: hidden
+        backface-visibility: hidden
+        -webkit-box-sizing: border-box
+        -moz-box-sizing: border-box
+        box-sizing: border-box
+        opacity: 1
+        -ms-filter: none
+        filter: none
+        position: relative
+        -webkit-transition: all 0.4s
+        -moz-transition: all 0.4s
+        -o-transition: all 0.4s
+        -ms-transition: all 0.4s
+        transition: all 0.4s
+        -webkit-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+        -moz-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+        -o-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+        -ms-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+        transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+        -webkit-transform: perspective(250px) rotateX(0)
+        -moz-transform: perspective(250px) rotateX(0)
+        -o-transform: perspective(250px) rotateX(0)
+        -ms-transform: perspective(250px) rotateX(0)
+        transform: perspective(250px) rotateX(0)
+        -webkit-transform-origin: center top
+        -moz-transform-origin: center top
+        -o-transform-origin: center top
+        -ms-transform-origin: center top
+        transform-origin: center top
+
+        &::before
+          font-family: Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif
+          background: #dcdcdc
+          border-radius: 15px
+          color: #fff
+          content: counter(step)
+          counter-increment: step
+          display: block
+          font-weight: bold
+          height: 28px
+          line-height: 28px
+          position: absolute
+          top: 11px
+          right: auto
+          bottom: auto
+          left: 21px
+          text-align: center
+          width: 28px
+
+      .step-wrapper-input
+        &:nth-child(odd)
+          background-color: $editorListItem
+        &:nth-child(even)
+          background-color: $editorListItemAlt
+
+        height: 90px
+        -webkit-backface-visibility: hidden
+        -moz-backface-visibility: hidden
+        -ms-backface-visibility: hidden
+        backface-visibility: hidden
+        -webkit-box-sizing: border-box
+        -moz-box-sizing: border-box
+        box-sizing: border-box
+        opacity: 1
+        -ms-filter: none
+        filter: none
+        position: relative
+        -webkit-transition: all 0.4s
+        -moz-transition: all 0.4s
+        -o-transition: all 0.4s
+        -ms-transition: all 0.4s
+        transition: all 0.4s
+        -webkit-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+        -moz-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+        -o-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+        -ms-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+        transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+        -webkit-transform: perspective(250px) rotateX(0)
+        -moz-transform: perspective(250px) rotateX(0)
+        -o-transform: perspective(250px) rotateX(0)
+        -ms-transform: perspective(250px) rotateX(0)
+        transform: perspective(250px) rotateX(0)
+        -webkit-transform-origin: center top
+        -moz-transform-origin: center top
+        -o-transform-origin: center top
+        -ms-transform-origin: center top
+        transform-origin: center top
+
+        &::before
+          font-family: Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif
+          font-size: 18px
+          background: #dcdcdc
+          border-radius: 15px
+          color: #fff
+          content: "+"
+          display: block
+          font-weight: 600
+          height: 28px
+          line-height: 26px
+          position: absolute
+          top: 11px
+          right: auto
+          bottom: auto
+          left: 21px
+          text-align: center
+          width: 28px
+
+  .recipe-ingredients
+    h3
+      font-size: 2.5rem
+      margin-top: 2em !important
+      margin-bottom: 0.8333 !important
+      text-transform: capitalize
+      font-weight: 700
+      line-height: 1.5
+      color: $editorBlack
+
+    .list
+      line-height: 1.5
+      margin: 0
+
+      .ingredient-line
+        padding: 0.2em
+        font-size: 1.3rem
+        text-transform: capitalize
+        font-family: "Raleway", "Roboto", sans-serif
+
+
+  .recipe-summary
+    background: $editorGray
+    color: #aaa
+    padding: 1em 0
+    text-align: center
+
+    .recipe-summary-item
+      position: relative
+      cursor: default
+      display: inline-block
+      width: 33%
+      box-sizing: border-box
+
+      @media screen and (max-width: 770px)
+        width: 30%
+
+      &.middle
+        border-left: 1px solid #ccc
+        border-right: 1px solid #ccc
+
+      .value
+        -webkit-font-smoothing: subpixel-antialiased
+        -moz-osx-font-smoothing: auto
+        -ms-font-smoothing: subpixel-antialiased
+        -o-font-smoothing: subpixel-antialiased
+        font-smoothing: subpixel-antialiased
+        font-family: "Roboto", HelveticaNeue Light, Helvetica Neue Light, Helvetica, Arial, sans-serif
+        font-weight: 100
+        font-size: 2.5em
+        color: $banner
+
+        @media screen and (max-width: 770px)
+          font-size: 1.75em
+
+      label
+        -webkit-font-smoothing: antialiased
+        -moz-osx-font-smoothing: grayscale
+        -ms-font-smoothing: antialiased
+        -o-font-smoothing: antialiased
+        font-smoothing: antialiased
+        font-family: "Cormorant Garamond", Times New Roman, serif
+        font-style: italic
+        font-weight: 400
+        position: relative
+        top: -.45em
+        left: .6em
+        font-size: 1.75rem
+
+        @media screen and (max-width: 770px)
+          font-size: 1.25rem
+          display: block
+          top: .125em
+          left: 0
+
+  .wrapper
+    max-width: 770px
+    position: relative
+    margin: 0 auto
+    height: 100%
+    padding: 0
+
+    @media screen and (max-width: 770px)
+      max-width: none
+      width: 90%
+
+  .recipe-details
+    height: calc(100vh - 450px)
+    padding: 50px 0 0
+    background: #363636
+    background-position: 50% 50%
+    background-size: cover
+    position: relative
+    transition: height .4s ease, padding .4s ease
+
+    @media screen and (max-width: 770px)
+      height: calc(100vh - 300px)
+
+    &:hover
+      .edit
+        opacity: 1
+
+    .close
+      position: absolute
+      right: 0em
+      top: 0em
+      color: $color-white
+      font-size: 3.2rem
+      z-index: 1000
+      opacity: 1
+      font-weight: 400
+      padding: 10px 20px
+      background-color: $editorBlack
+      transition: all 1s ease
+
+      &:hover
+        background-color: $color-veryLightGray
+        color: $editorBlack
+
+    .edit
+      cursor: pointer
+      position: absolute
+      left: 0em
+      top: 0em
+      color: $color-white
+      font-size: 2rem
+      z-index: 1000
+      opacity: 1
+      font-weight: 400
+      padding: 13px 18px
+      background-color: $editorBlack
+      transition: all 1s ease
+      opacity: 0.8
+
+      &:hover
+        background-color: $color-veryLightGray
+        color: $editorBlack
+
+    &::before
+      background-image: linear-gradient(180deg, transparent 60%, $editorBlack)
+      content: ''
+      display: block
+      position: absolute
+      bottom: 0
+      left: 0
+      right: 0
+      height: 100%
+      transition: background-color .6s ease
+
+    .primary-info
+      width: 100%
+      position: absolute
+      top: auto
+      right: auto
+      left: 0
+      bottom: 2.5em
+      color: #e0ddd2
+
+      @media screen and (max-width: 770px)
+        bottom: 1em
+
+      h1
+        width: 70%
+        white-space: normal
+        max-height: 3.75em
+        -webkit-font-smoothing: antialiased
+        -moz-osx-font-smoothing: grayscale
+        -ms-font-smoothing: antialiased
+        -o-font-smoothing: antialiased
+        font-smoothing: antialiased
+        font-family: "Raleway", "Roboto", sans-serif
+        margin: 0
+        font-weight: 100
+        font-size: 3rem
+        line-height: 1.25
+        white-space: pre
+        text-overflow: ellipsis
+        overflow: hidden
+        text-shadow: 0 0 0
+
+      .source
+        width: 70%
+        margin: 4px 0 0
+        -webkit-font-smoothing: antialiased
+        -moz-osx-font-smoothing: grayscale
+        -ms-font-smoothing: antialiased
+        -o-font-smoothing: antialiased
+        font-smoothing: antialiased
+        font-weight: 700
+        display: block
+        font-size: 1.20rem
+        letter-spacing: .5px
+        text-transform: uppercase
+
+/**
 /*  Btn Group
 /**
+
+.btn-main
+  border-radius: 0
+  background: $editorBlack !important
+  color: $editorListItemAlt !important
+  text-transform: uppercase
+  font-size: 14px
+  font-family: "Raleway", "Roboto", sans-serif
+  font-weight: 600
 
 .btn-group
   margin: 10px 0 0
@@ -185,32 +564,411 @@ body
     padding-right: 20px !important
     margin-left: 5px
 
-
 /**
-/*  Banner
+/*  Editor
 /**
 
-.banner
+.tag-list
+  margin: 10px 0
+
+.tag-pill
   background: $color-green
+  padding: 5px 10px
   color: $color-white
-  box-shadow: inset 0 8px 8px -8px rgba(0, 0, 0, 0.3), inset 0 -8px 8px -8px
-  margin: 0 0 30px
+  text-transform: uppercase
+  font-size: 1.2rem
+  margin: 0 5px 0 0
 
-  .logo-font
-    font-family: "Titillium Web", sans-serif
-    text-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3)
-    font-weight: 700 !important
-    text-align: center
-    font-size: 3.5rem
-    padding-bottom: 0.4em
+  i
+    cursor: pointer
+    margin: 0 5px 0 0
 
-  p
-    color: #fff
-    text-align: center
-    font-size: 1.5rem
-    font-weight: 300 !important
-    margin: 0 0 10px
+#editorForm
 
+  .btn
+    margin-top: 20px
+
+  input, textarea
+    font-family: 'Raleway', 'Roboto', sans-serif
+
+  textarea
+    resize: none
+    font-size: 14px
+    line-height: 20px
+    background-color: transparent
+    overflow: auto
+    vertical-align: top
+
+  fieldset
+    margin-top: 50px
+
+    &:first-of-type
+      margin-top: 0
+
+  .custom
+    border-style: none
+    width: 100%
+    color: $editorBlack
+    box-sizing: border-box
+    padding: 10
+    outline: none
+
+  .recipe-title
+    font-size: 28px
+    font-weight: 300
+    line-height: 32px
+    background: transparent
+    color: $color-darkGray
+    width: 100%
+    border: none
+    border-bottom: 1px solid #aaa
+    outline: none
+    margin-bottom: 15px
+    font-family: 'Raleway', 'Roboto', sans-serif
+
+  .input-header
+    font-size: 24px
+    line-height: 30px
+    color: $editorBlack
+    margin-bottom: 10px
+    display: inline-block
+    width: 100%
+    font-family: 'Raleway', 'Roboto', sans-serif
+    font-weight: 300
+
+    .section-header-small
+      font-size: 11px
+      line-height: 15px
+      color: #6c6c6c
+      text-transform: uppercase
+      font-family: Raleway, Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif
+      font-weight: 700
+      display: inline-block
+      float: right
+      margin-left: 30px
+      margin-bottom: 4px
+
+      .small-input
+        outline: none
+        font-family: "Raleway", "Roboto", sans-serif
+        width: 60px
+        height: 28px
+        background: #f5f5f5
+        margin-left: 10px
+        text-align: center
+        padding: 5px
+        font-size: 12px
+        -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset
+        border-style: none
+        color: $editorBlack
+        -webkit-box-sizing: border-box
+        -moz-box-sizing: border-box
+        box-sizing: border-box
+
+  .description
+    background-color: $editorGray
+
+    textarea
+      margin: 21px 0
+      padding: 0 25px
+
+  .all-list
+    -webkit-transform-style: preserve-3d
+    -moz-transform-style: preserve-3d
+    -o-transform-style: preserve-3d
+    -ms-transform-style: preserve-3d
+    transform-style: preserve-3d
+
+  .delete-row
+    cursor: pointer
+    background: url("../img/close.png") center center no-repeat
+    display: inline-block
+    position: absolute
+    top: 0
+    right: 0
+    bottom: auto
+    left: auto
+    width: 40px
+    height: 100%
+    opacity: 1
+    -ms-filter: none
+    filter: none
+    right: 0
+    -webkit-transition: opacity 0.2s
+    -moz-transition: opacity 0.2s
+    -o-transition: opacity 0.2s
+    -ms-transition: opacity 0.2s
+    transition: opacity 0.2s
+
+  .prep-steps
+    counter-reset: step
+
+    .step-wrapper
+      &:nth-child(odd)
+        background-color: $editorListItem
+      &:nth-child(even)
+        background-color: $editorListItemAlt
+
+      height: 90px
+      -webkit-backface-visibility: hidden
+      -moz-backface-visibility: hidden
+      -ms-backface-visibility: hidden
+      backface-visibility: hidden
+      -webkit-box-sizing: border-box
+      -moz-box-sizing: border-box
+      box-sizing: border-box
+      opacity: 1
+      -ms-filter: none
+      filter: none
+      position: relative
+      -webkit-transition: all 0.4s
+      -moz-transition: all 0.4s
+      -o-transition: all 0.4s
+      -ms-transition: all 0.4s
+      transition: all 0.4s
+      -webkit-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+      -moz-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+      -o-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+      -ms-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+      transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+      -webkit-transform: perspective(250px) rotateX(0)
+      -moz-transform: perspective(250px) rotateX(0)
+      -o-transform: perspective(250px) rotateX(0)
+      -ms-transform: perspective(250px) rotateX(0)
+      transform: perspective(250px) rotateX(0)
+      -webkit-transform-origin: center top
+      -moz-transform-origin: center top
+      -o-transform-origin: center top
+      -ms-transform-origin: center top
+      transform-origin: center top
+
+      textarea
+        margin: 0 0 0 60px
+        padding: 15px 0
+        width: 80%
+
+      &::before
+        font-family: Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif
+        background: #dcdcdc
+        border-radius: 15px
+        color: #fff
+        content: counter(step)
+        counter-increment: step
+        display: block
+        font-weight: bold
+        height: 28px
+        line-height: 28px
+        position: absolute
+        top: 11px
+        right: auto
+        bottom: auto
+        left: 21px
+        text-align: center
+        width: 28px
+
+    .step-wrapper-input
+      &:nth-child(odd)
+        background-color: $editorListItem
+      &:nth-child(even)
+        background-color: $editorListItemAlt
+
+      height: 90px
+      -webkit-backface-visibility: hidden
+      -moz-backface-visibility: hidden
+      -ms-backface-visibility: hidden
+      backface-visibility: hidden
+      -webkit-box-sizing: border-box
+      -moz-box-sizing: border-box
+      box-sizing: border-box
+      opacity: 1
+      -ms-filter: none
+      filter: none
+      position: relative
+      -webkit-transition: all 0.4s
+      -moz-transition: all 0.4s
+      -o-transition: all 0.4s
+      -ms-transition: all 0.4s
+      transition: all 0.4s
+      -webkit-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+      -moz-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+      -o-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+      -ms-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+      transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+      -webkit-transform: perspective(250px) rotateX(0)
+      -moz-transform: perspective(250px) rotateX(0)
+      -o-transform: perspective(250px) rotateX(0)
+      -ms-transform: perspective(250px) rotateX(0)
+      transform: perspective(250px) rotateX(0)
+      -webkit-transform-origin: center top
+      -moz-transform-origin: center top
+      -o-transform-origin: center top
+      -ms-transform-origin: center top
+      transform-origin: center top
+
+      textarea
+        margin: 0 0 0 60px
+        padding: 15px 0
+        width: 80%
+
+      &::before
+        font-family: Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif
+        font-size: 18px
+        background: #dcdcdc
+        border-radius: 15px
+        color: #fff
+        content: "+"
+        display: block
+        font-weight: 600
+        height: 28px
+        line-height: 26px
+        position: absolute
+        top: 11px
+        right: auto
+        bottom: auto
+        left: 21px
+        text-align: center
+        width: 28px
+
+  .ingredients-list
+    .line-wrapper
+      box-sizing: border-box
+
+      &:nth-child(odd)
+        background-color: $editorListItem
+      &:nth-child(even)
+        background-color: $editorListItemAlt
+
+    .ing-wrapper
+      height: 64px
+      -webkit-backface-visibility: hidden
+      -moz-backface-visibility: hidden
+      -ms-backface-visibility: hidden
+      backface-visibility: hidden
+      -webkit-box-sizing: border-box
+      -moz-box-sizing: border-box
+      box-sizing: border-box
+      opacity: 1
+      -ms-filter: none
+      filter: none
+      position: relative
+      -webkit-transition: all 0.4s
+      -moz-transition: all 0.4s
+      -o-transition: all 0.4s
+      -ms-transition: all 0.4s
+      transition: all 0.4s
+      -webkit-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+      -moz-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+      -o-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+      -ms-transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+      transition-timing-function: cubic-bezier(.215, .61, .355, 1)
+      -webkit-transform: perspective(250px) rotateX(0)
+      -moz-transform: perspective(250px) rotateX(0)
+      -o-transform: perspective(250px) rotateX(0)
+      -ms-transform: perspective(250px) rotateX(0)
+      transform: perspective(250px) rotateX(0)
+      -webkit-transform-origin: center top
+      -moz-transform-origin: center top
+      -o-transform-origin: center top
+      -ms-transform-origin: center top
+      transform-origin: center top
+
+      textarea
+        padding: 21px
+        width: 97%
+        margin: 0 0 0 5px
+        height: 100%
+        white-space: pre
+        box-sizing: border-box
+
+
+.editor-hero-image-upload
+  position: relative
+  height: 300px
+  width: 100%
+  background-color: $color-veryLightGray
+  background-image: url(../img/image-upload.png)
+  background-position: 50% 50%
+  background-repeat: no-repeat
+  margin-bottom: -90px
+  overflow: hidden
+
+  &::after
+    content: " "
+    display: none
+    position: absolute
+    background-image: linear-gradient(180deg, transparentize($color-white, 1), transparentize($color-black, 0.5) 90%)
+    width: 100%
+    height: 100%
+
+.editor-hero-image
+  position: relative
+  height: 300px
+  width: 100%
+  background-color: $color-veryLightGray
+  background-size: cover
+  background-position: 50% 50%
+  background-repeat: no-repeat
+  margin-bottom: -90px
+  overflow: hidden
+
+  &::after
+    content: " "
+    display: block
+    position: absolute
+    background-image: linear-gradient(180deg, transparentize($color-white, 1), transparentize($color-black, 0.5) 70%)
+    width: 100%
+    height: 100%
+
+#editorHeroImage
+
+  #closeButton
+    position: absolute
+    right: 0em
+    top: 0em
+    color: $color-white
+    font-size: 3.2rem
+    z-index: 1000
+    opacity: 1
+    font-weight: 400
+    padding: 15px 20px
+    background-color: $editorBlack
+    transition: all 1s ease
+
+    @media screen and (max-width: 770px)
+      padding: 5px 10px
+
+    &:hover
+      background-color: $color-veryLightGray
+      color: $editorBlack
+
+  .editor-add-image
+    width: 79%
+    margin: 0 auto
+
+
+  .editor-title-image
+    text-transform: uppercase
+    display: inline-block
+    color: $color-darkGray
+    font-size: 18px
+    padding: 20px
+    padding-left: 0
+    font-weight: 600
+
+  #addImage
+    border: none
+    background-color: $color-mediumWhite
+    border-radius: 3px
+    line-height: 15px
+    color: $color-darkGray
+    font-size: 11px
+    padding: 10px 20px
+    text-transform: uppercase
+
+    &:focus
+      border: none
+      outline: none
 
 /**
 /*  SearchBar
@@ -222,18 +980,32 @@ body
   box-sizing: border-box
   position: relative
 
-  #smartBar
+  @media screen and (max-width: 770px)
+    width: 100%
+
+  #searchBar
     position: relative
+    outline: none !important
+    border: none
+    background-color: $color-veryLightGray
+    line-height: 24px
+    padding: 10px 15px
+    min-width: 320px
+    color: $color-darkGray
+
+    @media screen and (max-width: 770px)
+      width: 100%
+
 
   #smartList
     display: none
     position: absolute
     list-style: none
-    background: $color-green
     padding: 0 !important
     width: 100%
     box-sizing: border-box
     z-index: 1000
+    background: $editorBlack
 
     &.showing
       display: block
@@ -242,6 +1014,13 @@ body
       color: $color-white
       padding: 10px 10px 0 !important
       cursor: pointer
+
+      a
+        color: $color-white
+        text-decoration: none
+        display: inline-block
+        width: 100%
+        height: 100%
 
       &:last-of-type
         margin-bottom: 10px
@@ -256,6 +1035,141 @@ body
 
       &:last-of-type::after
         display: none
+
+.grid
+  display: flex
+  flex-direction: row
+  flex-wrap: wrap
+  align-items: flex-start
+  justify-content: flex-start
+  align-content: flex-start
+
+  @media screen and (max-width: 770px)
+    margin: auto 15px
+
+  /**
+  /* Recipe overview
+  /**
+  .recipe
+    position: relative
+    width: 33.3333%
+    height: 25vw
+    background-size: cover
+    background-position: 50% 50%
+    overflow: hidden
+    z-index: 10
+
+    @media screen and (max-width: 770px)
+      width: 50%
+      height: 27vh
+
+    &:hover
+      .recipe-info
+
+        .recipe-ingredients
+          max-height: 36px
+          opacity: 1
+          filter: none
+          -ms-filter: none
+
+    &::after
+      overflow: hidden
+      display: block
+      position: absolute
+      top: 0
+      left: 0
+      width: 100%
+      height: 100%
+      content: " "
+      z-index: 20
+      background-image: linear-gradient( 180deg, transparentize($color-white, 1), transparentize($color-black, 0.5) 90% )
+
+    &.no-image
+      &:nth-of-type(odd)
+        background-color: $editorBlack
+
+      &:nth-of-type(even)
+        background-color: $color-darkGray
+
+    a
+      position: relative
+      display: block
+      width: 100%
+      height: 100%
+      z-index: 100
+      cursor: pointer
+
+    .recipe-info
+      display: block
+      position: absolute
+      color: $color-white
+      bottom: 5%
+      left: 5%
+      top: auto
+      width: 90%
+      z-index: 100
+
+      .recipe-ingredients
+        position: static
+        visibility: visible
+        max-height: 0px
+        overflow: hidden
+        margin: 0
+        width: 98%
+        color: #e1ddd2
+        opacity: 0
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)"
+        filter: alpha(opacity=0)
+        -webkit-transition: all 1s ease
+        -moz-transition: all 1s ease
+        -o-transition: all 1s ease
+        -ms-transition: all 1s ease
+        transition: all 1s ease
+        display: block
+        font-size: 13px
+        line-height: 18px
+        text-shadow: 0 1px 2px #000, 0 0 0
+
+        strong
+          text-transform: uppercase
+
+      .recipe-source
+        font-size: 13px
+        line-height: 18px
+        overflow: hidden
+        -o-text-overflow: ellipsis
+        text-overflow: ellipsis
+        white-space: nowrap
+        width: auto
+        font-weight: bold
+        letter-spacing: .5px
+        padding: 7px 0 5px
+        text-transform: uppercase
+        text-shadow: 0 1px 2px #000, 0 0 0
+
+
+      .recipe-title
+        display: block
+        text-align: left
+        font-size: 18px
+        line-height: 1.25
+        margin: 0
+        text-shadow: 0 1px 2px #000, 0 0 0
+        font-weight: 400
+        font-family: 'Raleway', 'Roboto', sans-serif
+        -webkit-font-smoothing: antialiased
+        -moz-osx-font-smoothing: grayscale
+
+        // @media screen and (max-width: 770px)
+        //   font-size: 14px
+
+        span
+          overflow: hidden
+          text-overflow: ellipsis
+          white-space: nowrap
+          width: auto
+          display: block
+
 
 
 /**

@@ -15,6 +15,7 @@ var sass          = require('gulp-sass');
 var jsFiles   = "src/js/**/*.js";
 var viewFiles = "src/js/**/*.html";
 var sassFiles = "src/sass/**/*.sass";
+var imageFiles = "src/img/**/*.*"
 
 var interceptErrors = function() {
   var args = Array.prototype.slice.call(arguments);
@@ -46,6 +47,11 @@ gulp.task('sass', function () {
   return gulp.src('./src/sass/**/*.sass')
     .pipe(sass.sync().on('error', sass.logError))
     .pipe(gulp.dest('./build/css'));
+});
+
+gulp.task('img', function() {
+  return gulp.src('./src/img/**/*.*')
+    .pipe(gulp.dest('./build/img'));
 });
 
 gulp.task('html', function() {
@@ -80,7 +86,7 @@ gulp.task('build', ['html', 'sass', 'browserify'], function() {
   return merge(html, css, js);
 });
 
-gulp.task('default', ['html', 'sass', 'browserify'], function() {
+gulp.task('default', ['html', 'sass', 'browserify', 'img'], function() {
 
   browserSync.init(['./build/**/**.**'], {
     server: "./build",
@@ -95,4 +101,5 @@ gulp.task('default', ['html', 'sass', 'browserify'], function() {
   gulp.watch(sassFiles, ['sass']);
   gulp.watch(viewFiles, ['views']);
   gulp.watch(jsFiles, ['browserify']);
+  gulp.watch(imageFiles, ['img']);
 });

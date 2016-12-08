@@ -20,7 +20,7 @@ router.param('recipe', function(req, res, next, slug) {
 
 // Get all recipes
 router.get('/', auth.optional, function(req, res, next) {
-  var limit = 10;
+  var limit = 20;
   var offset = 0;
 
   if (typeof req.query.limit !== 'undefined'){
@@ -31,9 +31,9 @@ router.get('/', auth.optional, function(req, res, next) {
     offset = req.query.offset;
   }
 
-  Recipe.find().limit(limit).skip(offset).then(function (recipes) {
+  Recipe.find().limit(limit).skip(offset).populate('author').then(function (recipes) {
     return res.json(recipes);
-  });
+  }).catch(next);
 });
 
 // Get one recipe
@@ -82,9 +82,9 @@ router.post('/', auth.required, function(req, res, next) {
 
 // update recipe
 router.put('/:recipe', auth.required, function(req, res, next) {
-  console.log("Recipe ID:  " + req.recipe._id.toString());
-  console.log("Payload ID: " + req.payload.id.toString());
-  if(req.recipe._id.toString() === req.payload.id.toString()){
+  if(req.recipe.author._id.toString() === req.payload.id.toString()){
+    console.log(req.body.recipe.instructions);
+    // Validate new recipe
     if(typeof req.body.recipe.title !== 'undefined'){
       req.recipe.title = req.body.recipe.title;
     }
@@ -97,11 +97,22 @@ router.put('/:recipe', auth.required, function(req, res, next) {
       req.recipe.ingredients = req.body.recipe.ingredients;
     }
 
+    if(typeof req.body.recipe.image != 'undefined'){
+      req.recipe.image = req.body.recipe.image;
+    }
+
+    if(typeof req.body.recipe.portions != 'undefined'){
+      req.recipe.portions = req.body.recipe.portions;
+    }
+
+    if(typeof req.body.recipe.instructions != 'undefined'){
+      req.recipe.instructions = req.body.recipe.instructions;
+    }
+
     req.recipe.save().then(function(recipe){
       return res.json({recipe: recipe.toJSONFor()});
     }).catch(next);
   } else {
-    console.log("Not authorized");
     return res.sendStatus(403);
   }
 });

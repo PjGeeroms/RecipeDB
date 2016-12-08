@@ -1,26 +1,26 @@
 <div class="auth-page">
   <div class="container page">
     <div class="row">
+      <div class="login-center">
 
-      <div class="col-md-6 col-md-offset-3 col-xs-12">
-        <h1 class="text-center form-header" ng-bind="::$ctrl.title">Login</h1>
 
-        <list-errors errors="$ctrl.errors"></list-errors>
-
-        <form ng-submit="$ctrl.submitForm()">
+        <form ng-submit="$ctrl.submitForm()" id="authentication">
           <fieldset ng-disabled="$ctrl.isSubmitting">
-
-            <fieldset class="form-group">
-              <input class="form-control input-lg"
+            <h1 class="text-center form-header" ng-bind="::$ctrl.title">Login</h1>
+            <span class="error" ng-show="$ctrl.errors.email">Email {{$ctrl.errors.email}}</span>
+            <span class="error" ng-show="$ctrl.errors['email or password']">Email or password {{$ctrl.errors['email or password']}}</span>
+            <fieldset>
+              <input
                 type="text"
-                placeholder="Email"
+                placeholder="EMAIL"
                 ng-model="$ctrl.formData.email" />
             </fieldset>
 
-            <fieldset class="form-group">
-              <input class="form-control input-lg"
+            <fieldset>
+              <span class="error" ng-show="$ctrl.errors.password">Password {{$ctrl.errors.password}}</span>
+              <input
                 type="password"
-                placeholder="Password"
+                placeholder="PASSWORD"
                 ng-model="$ctrl.formData.password" />
             </fieldset>
 

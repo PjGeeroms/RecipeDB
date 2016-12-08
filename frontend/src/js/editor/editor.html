@@ -1,59 +1,129 @@
 <div class="editor-page">
-  <div class="container page">
-    <div class="row">
-      <div class="col-md-10 offset-md-1 col-xs-12">
-
-        <list-errors errors="$ctrl.errors"></list-errors>
-
-        <form>
-          <fieldset ng-disabled="$ctrl.isSubmitting">
-
-            <fieldset class="form-group">
-              <input class="form-control form-control-lg"
-                ng-model="$ctrl.recipe.title"
-                type="text"
-                placeholder="Recipe Title" />
-            </fieldset>
-
-            <fieldset class="form-group">
-              <textarea class="form-control"
-                rows="8"
-                ng-model="$ctrl.recipe.body"
-                placeholder="Write your recipe (in markdown)">
-              </textarea>
-            </fieldset>
-
-            <fieldset class="form-group">
-              <input type="text" class="form-control"
-                ng-model="$ctrl.recipe.image"
-                placeholder="http://mylinktoimage.be/image.jpg">
-              </input>
-            </fieldset>
-
-            <fieldset class="form-group">
-              <input class="form-control"
-                type="text"
-                placeholder="Enter ingredient"
-                ng-model="$ctrl.ingredientField"
-                ng-keyup="$event.keyCode == 13 && $ctrl.addIngredient()"/>
-
-              <div class="tag-list">
-                <span ng-repeat="ingredient in $ctrl.recipe.ingredients"
-                  class="tag-default tag-pill">
-                  <i class="ion-close-round" ng-click="$ctrl.removeIngredient(ingredient)"></i>
-                  {{ ingredient }}
-                </span>
-              </div>
-            </fieldset>
-
-            <button class="btn btn-lg pull-xs-right btn-primary" type="button" ng-click="$ctrl.submit()">
-              Publish Recipe
-            </button>
-
-          </fieldset>
-        </form>
-
+  <form id="editorForm">
+    <div class="editor-hero-image-upload" id="editorHeroImage">
+      <i class="ion-close-round hidden close" id="closeButton"></i>
+      <div class="editor-add-image" id="addImageBox">
+        <div class="editor-title-image">Add your image</div>
+        <input type="text" id="addImage" placeholder="url to image" ng-model="$ctrl.image" image-changer recipeimage="$ctrl.recipe.image" image="$ctrl.image" autocomplete="off"/>
       </div>
     </div>
-  </div>
+    <div class="container page">
+      <div class="row">
+        <div class="col-md-offset-3 col-md-6 col-xs-12">
+
+            <fieldset ng-disabled="$ctrl.isSubmitting">
+
+              <fieldset>
+                <span class="error" ng-bind="$ctrl.errors.title"></span>
+                <input class="custom recipe-title"
+                  id="recipeTitle"
+                  ng-model="$ctrl.recipe.title"
+                  type="text"
+                  placeholder="Title" />
+              </fieldset>
+
+              <fieldset class="form-group">
+                <div class="input-header">
+                  Description
+                </div>
+                <span class="error" ng-bind="$ctrl.errors.description"></span>
+                <div class="description">
+                  <textarea
+                    class="custom"
+                    rows="3"
+                    cols="50"
+                    maxlength="4000"
+                    ng-model="$ctrl.recipe.body"
+                    placeholder="Tell us something about the recipe"
+                    description-validator
+                    value="$ctrl.recipe.body"
+                    errors = $ctrl.errors
+                    >
+                  </textarea>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <div class="input-header">
+                  Ingredients
+                  <label for="numberOfServings" class="section-header-small">
+                    PORTIONS
+                    <input class="small-input" maxlength="4" name="numberOfServings" type="text" ng-model="$ctrl.recipe.portions"/>
+                  </label>
+                </div>
+
+                <div class="ingredients-list all-list">
+                  <span class="error" ng-bind="$ctrl.errors.portions"></span>
+                  <span class="error" ng-bind="$ctrl.errors.ingredients"></span>
+                  <div class="line-wrapper ing-wrapper">
+                    <textarea
+                      class="custom ingredient-text"
+                      maxlength="1000"
+                      name="ingredientLines"
+                      type="text"
+                      placeholder="Add ingredient (for example 2tsp sugar)"
+                      rows="1"
+                      cols="50"
+                      ng-model="$ctrl.ingredientField"
+                      ng-keyup="$event.keyCode == 13 && $ctrl.addIngredient()"
+                      onkeydown="if(event.keyCode == 13) return false;"
+                      ></textarea>
+                  </div>
+                  <div class="line-wrapper ing-wrapper" ng-repeat="ingredient in $ctrl.recipe.ingredients">
+                    <textarea class="custom ingredient-text"
+                    maxlength="1000"
+                    name="ingredientLines"
+                    type="text"
+                    placeholder="Add ingredient (for example 2tsp sugar)"
+                    readonly="true"
+                    >{{ingredient}}</textarea>
+                    <i class="delete-row"
+                      ng-click="$ctrl.removeIngredient(ingredient)"></i>
+                  </div>
+                </div>
+              </fieldset>
+                <fieldset>
+                  <div class="input-header">
+                    Instructions
+                  </div>
+
+                  <div class="prep-steps all-list">
+                    <span class="error" ng-bind="$ctrl.errors.instructions"></span>
+                    <div class="line-wrapper step-wrapper-input">
+                      <textarea
+                        class="custom ingredient-text"
+                        maxlength="1000"
+                        name="instructionLines"
+                        type="text"
+                        placeholder="Add instruction"
+                        rows="1"
+                        cols="50"
+                        ng-model="$ctrl.instructionField"
+                        ng-keyup="$event.keyCode == 13 && $ctrl.addInstruction()"
+                        onkeydown="if(event.keyCode == 13) return false;"
+                        ></textarea>
+                    </div>
+                    <div class="line-wrapper step-wrapper" ng-repeat="instruction in $ctrl.recipe.instructions">
+                      <textarea class="custom ingredient-text"
+                      maxlength="1000"
+                      name="instructionLines"
+                      type="text"
+                      placeholder="Add instruction"
+                      readonly="true"
+                      >{{instruction}}</textarea>
+                      <i class="delete-row"
+                        ng-click="$ctrl.removeInstruction(instruction)"></i>
+                    </div>
+                  </div>
+                </fieldset>
+
+              <button class="btn btn-lg pull-xs-right btn-main" type="button" ng-click="$ctrl.submit()">
+                Publish Recipe
+              </button>
+
+            </fieldset>
+        </div>
+      </div>
+    </div>
+  </form>
 </div>

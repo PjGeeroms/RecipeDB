@@ -9,8 +9,10 @@ export default function RecipeDetailConfig($stateProvider, $httpProvider) {
     templateUrl: 'recipedetail/recipedetail.html',
     title: "Recipe",
     resolve: {
+      auth: function(User) {
+        return User.ensureAuthIs(true);
+      },
       recipe: function(Recipes, $stateParams) {
-        console.log($stateParams);
         return Recipes.getRecipe($stateParams.slug)
       }
     }

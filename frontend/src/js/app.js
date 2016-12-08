@@ -21,6 +21,9 @@ import './editor';
 // Import smart-table
 import './smarttable/smart-table.min.js';
 
+// Custom scripts
+import './scripts/mobileMenu.js';
+
 
 // Create and bootstrap application
 const requires = [

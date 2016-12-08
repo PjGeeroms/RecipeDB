@@ -8,6 +8,8 @@ var RecipeSchema = new mongoose.Schema({
   title: String,
   ingredients: [{type: String}],
   body: String,
+  portions: String,
+  instructions: [{type: String}],
   image: String,
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, {timestamps: true});
@@ -21,15 +23,7 @@ RecipeSchema.pre('validate', function(next, done){
 });
 
 RecipeSchema.methods.slugify = function() {
-  // string = this:title
-  // slug = slug(string)
-  // while slug exits
-  //   string = convertstring
-  //   slug = slug(string)
-  // this.slug = slug(this.title);
-  // this.find({slug: this.slug}).then(
-  //
-  // );
+  
   this.slug = slug(this.title);
 };
 
@@ -39,6 +33,9 @@ RecipeSchema.methods.toJSONFor = function(){
     title: this.title,
     ingredients: this.ingredients,
     body: this.body,
+    instructions: this.instructions,
+    portions: this.portions,
+    image: this.image,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
     author: this.author.toProfileJSONFor()

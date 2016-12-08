@@ -36970,14 +36970,11 @@ require('./editor');
 
 require('./smarttable/smart-table.min.js');
 
+require('./scripts/mobileMenu.js');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Create and bootstrap application
-
-// Import our app functionaity
-var requires = ['ui.router', 'templates', 'app.layout', 'app.components', 'app.home', 'app.services', 'app.recipe', 'app.recipedetail', 'app.auth', 'app.settings', 'app.editor', 'smart-table'];
-
-// Mount on window for testing
 
 
 // Import smart-table
@@ -36986,6 +36983,14 @@ var requires = ['ui.router', 'templates', 'app.layout', 'app.components', 'app.h
 
 
 // Import our app config files
+var requires = ['ui.router', 'templates', 'app.layout', 'app.components', 'app.home', 'app.services', 'app.recipe', 'app.recipedetail', 'app.auth', 'app.settings', 'app.editor', 'smart-table'];
+
+// Mount on window for testing
+
+
+// Custom scripts
+
+// Import our app functionaity
 window.app = _angular2.default.module('app', requires);
 
 _angular2.default.module('app').constant('AppConstants', _app2.default);
@@ -36998,7 +37003,7 @@ _angular2.default.bootstrap(document, ['app'], {
   strictDi: true
 });
 
-},{"./auth":7,"./components":10,"./config/app.config":13,"./config/app.constants":14,"./config/app.run":15,"./config/app.templates":16,"./editor":20,"./home":23,"./layout":26,"./recipe":27,"./recipedetail":30,"./services":33,"./settings":37,"./smarttable/smart-table.min.js":40,"angular":3,"angular-ui-router":1}],5:[function(require,module,exports){
+},{"./auth":7,"./components":12,"./config/app.config":16,"./config/app.constants":17,"./config/app.run":18,"./config/app.templates":19,"./editor":23,"./home":26,"./layout":29,"./recipe":30,"./recipedetail":33,"./scripts/mobileMenu.js":36,"./services":37,"./settings":41,"./smarttable/smart-table.min.js":44,"angular":3,"angular-ui-router":1}],5:[function(require,module,exports){
 'use strict';
 
 AuthConfig.$inject = ["$stateProvider", "$httpProvider"];
@@ -37015,6 +37020,16 @@ function AuthConfig($stateProvider, $httpProvider) {
     controller: 'AuthController as $ctrl',
     templateUrl: 'auth/auth.html',
     title: 'Login',
+    resolve: {
+      auth: ["User", function auth(User) {
+        return User.ensureAuthIs(false);
+      }]
+    }
+  }).state('app.register', {
+    url: '/register',
+    controller: 'AuthController as $ctrl',
+    templateUrl: 'auth/register.html',
+    title: 'Register',
     resolve: {
       auth: ["User", function auth(User) {
         return User.ensureAuthIs(false);
@@ -37037,15 +37052,29 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var AuthController = function () {
-  AuthController.$inject = ["User", "$state"];
-  function AuthController(User, $state) {
+  AuthController.$inject = ["User", "$state", "AppConstants"];
+  function AuthController(User, $state, AppConstants) {
     'ngInject';
 
     _classCallCheck(this, AuthController);
 
+    this._AppConstants = AppConstants;
     this.title = $state.current.title;
     this._User = User;
     this._$state = $state;
+    this.authType = $state.current.name.replace('app.', '');
+    this.formData = {
+      username: "",
+      email: "",
+      password: "",
+      registerKey: ""
+    };
+    this.errors = {
+      username: "",
+      email: "",
+      password: "",
+      registerKey: ""
+    };
   }
 
   _createClass(AuthController, [{
@@ -37053,13 +37082,49 @@ var AuthController = function () {
     value: function submitForm() {
       var _this = this;
 
-      this.isSubmitting = true;
+      if (this.authType == 'register') {
 
-      this._User.attemptAuth(this.formData).then(function (res) {
-        _this._$state.go('app.home');
+        var validForm = true;
+        var regex = {
+          email: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        };
+
+        if (!(this.formData.registerKey === this._AppConstants.registerKey) || !(this.formData.registerKey.length > 0)) {
+          this.errors.registerKey = "The key provided was invalid";
+          validForm = false;
+        } else {
+          this.errors.registerKey = "";
+        }
+        if (!(this.formData.username.length >= 2)) {
+          this.errors.username = "Username should have at least 2 characters";
+          validForm = false;
+        } else {
+          this.errors.username = "";
+        }
+        if (!regex.email.test(this.formData.email)) {
+          this.errors.email = "The provided email address was invalid";
+          validForm = false;
+        } else {
+          this.errors.email = "";
+        }
+        if (!(this.formData.password.length >= 5)) {
+          this.errors.password = "Password should have at least 5 characters";
+          validForm = false;
+        } else {
+          this.errors.password = "";
+        }
+        if (!validForm) {
+          return;
+        }
+      }
+
+      this.isSubmitting = true;
+      this._User.attemptAuth(this.authType, this.formData).then(function () {
+        _this._$state.go('app.recipe');
       }, function (err) {
+        console.log(err);
         _this.isSubmitting = false;
-        console.log(err.data.errors);
+        _this.errors = err.data.errors;
       });
     }
   }]);
@@ -37134,7 +37199,7 @@ function AutoComplete($compile) {
           //Execute method in parent controller
           scope.keyup({ filter: newValue });
 
-          var listNode = $compile('\n              <li ng-repeat="item in list" class="item">{{item.title}}</li>\n            ')(scope);
+          var listNode = $compile('\n              <li ng-repeat="item in list" class="item">\n                <a href="/#/recipes/{{item.slug}}">\n                  {{item.title}}\n                </a>\n              </li>\n            ')(scope);
 
           //Add list items to list
           smartList.html(listNode);
@@ -37150,47 +37215,131 @@ function AutoComplete($compile) {
 },{}],9:[function(require,module,exports){
 'use strict';
 
-EditableRow.$inject = ["$compile"];
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = EditableRow;
-function EditableRow($compile) {
+exports.default = DescriptionValidator;
+function DescriptionValidator() {
   'ngInject';
 
   return {
     restrict: 'A',
     scope: {
-      updateData: '&',
-      model: '='
+      value: "=",
+      errors: "="
     },
-    link: function link(scope, element) {
-      element.bind("click", function () {
-        // Check if an editable row already exists
-        var editableRow = angular.element('.editableRow');
-        if (editableRow !== []) {
-          editableRow.remove();
+    link: function link(scope) {
+
+      scope.$watch('value', function (newValue) {
+        if (newValue.length > 1 || newValue.length == 0) {
+          scope.errors.description = "";
+        } else {
+          scope.errors.description = "Description has to be longer then 1 character";
         }
-
-        // Create a row
-        var childNode = $compile('<tr class="editableRow">\n          <td colspan="7">\n            <form class="form-horizontal">\n              <div class="form-group">\n                <label for="provider" class="col-sm-4 control-label">Provider</label>\n                <div class="col-sm-4">\n                  <input type="text" class="form-control" id="provider" placeholder="Provider" ng-model="model.provider"/>\n                </div>\n              </div>\n\n              <div class="form-group">\n                <label for="abonnement" class="col-sm-4 control-label">Abonnement</label>\n                <div class="col-sm-4">\n                  <input type="text" class="form-control" id="abonnement" placeholder="Abonnement" ng-model="model.abonnement" />\n                </div>\n              </div>\n\n              <div class="form-group">\n                <label for="bellen" class="col-sm-4 control-label">Belminuten</label>\n                <div class="col-sm-4">\n                  <input type="text" class="form-control" id="bellen" placeholder="Belminuten" ng-model="model.belminuten"/>\n                </div>\n              </div>\n\n              <div class="form-group">\n                <label for="sms" class="col-sm-4 control-label">Sms</label>\n                <div class="col-sm-4">\n                  <input type="text" class="form-control" id="sms" placeholder="Sms" ng-model="model.sms"/>\n                </div>\n              </div>\n\n              <div class="form-group">\n                <label for="data" class="col-sm-4 control-label">Data</label>\n                <div class="col-sm-4">\n                  <input type="text" class="form-control" id="data" placeholder="Data" ng-model="model.data"/>\n                </div>\n              </div>\n\n              <div class="form-group">\n                <label for="prijs" class="col-sm-4 control-label">Prijs</label>\n                <div class="col-sm-4">\n                  <input type="text" class="form-control" id="prijs" placeholder="Prijs" ng-model="model.prijs"/>\n                </div>\n              </div>\n\n              <div class="form-group">\n                <div class="col-sm-offset-4 col-sm-3">\n                  <button type="submit" class="btn btn-warning editButton" ng-click="updateData({dataArg: model})">\n                    <i class="ion-checkmark-round"></i>&nbsp;Save\n                  </button>\n                </div>\n              </div>\n            </form>\n          </td>\n        </tr>')(scope);
-
-        // Add editable row after current ro
-        element.closest('tr').after(childNode);
-
-        // Add the editableRow to a variable
-        editableRow = angular.element('.editableRow');
-
-        // Bind click event on save button to remove editableRow on click
-        angular.element('.editButton').bind("click", function () {
-          editableRow.remove();
-        });
       });
     }
   };
 }
 
 },{}],10:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ImageChanger;
+function ImageChanger() {
+  'ngInject';
+
+  return {
+    restrict: 'A',
+    scope: {
+      image: "=",
+      recipeimage: "="
+    },
+    link: function link(scope) {
+      var rgx = /^https?:\/\/(?:[a-z\-]+\.)+[a-z]{2,6}(?:\/[^\/#?]+)+\.(?:jpe?g|gif|png)$/;
+
+      // Remove image
+      angular.element('#closeButton').on('click', function () {
+        angular.element('#addImageBox').animate({
+          opacity: 1
+        }, 1000);
+        scope.image = "";
+        scope.recipeimage = "";
+        angular.element('#editorHeroImage').removeClass('editor-hero-image').css({
+          'background-image': ''
+        }).addClass('editor-hero-image-upload');
+        angular.element('#closeButton').addClass('hidden');
+        angular.element('#recipeTitle').css({
+          "color": "#6c6c6c"
+        });
+      });
+
+      scope.$watch('image', function (newValue) {
+        // Add image
+        if (rgx.test(newValue)) {
+          scope.recipeimage = newValue;
+          scope.image = "";
+          angular.element('#editorHeroImage').css({
+            "background-image": "url(" + newValue + ")"
+          });
+
+          // Hide image input field
+          // Show close button
+          angular.element('#addImageBox').animate({
+            opacity: 0
+          }, 1000);
+          angular.element('#closeButton').removeClass('hidden');
+
+          // Change color of recipe title
+          angular.element('#recipeTitle').css({
+            "color": "#f7f7f7"
+          });
+
+          // Add linear gradient to background
+          angular.element('#editorHeroImage').removeClass('editor-hero-image-upload').addClass('editor-hero-image');
+        }
+      });
+    }
+  };
+}
+
+},{}],11:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ImageChecker;
+function ImageChecker() {
+  'ngInject';
+
+  return {
+    restrict: 'A',
+    scope: {
+      image: "="
+    },
+    link: function link(scope, element) {
+
+      if (scope.image.length > 0) {
+        angular.element(element).css({
+          'background-image': 'url(' + scope.image + ')'
+        });
+      } else {
+        angular.element(element).addClass('no-image');
+
+        // angular.element(element).css({
+        //   'background-image' : 'url(../img/image-upload.png)',
+        //   'background-size' : '30%',
+        //   'background-repeat' : 'no-repeat'
+        // });
+      }
+    }
+  };
+}
+
+},{}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -37209,13 +37358,25 @@ var _showAuthed = require('./show-authed.directive');
 
 var _showAuthed2 = _interopRequireDefault(_showAuthed);
 
-var _editableRow = require('./editable-row.directive');
-
-var _editableRow2 = _interopRequireDefault(_editableRow);
-
 var _autocomplete = require('./autocomplete.directive');
 
 var _autocomplete2 = _interopRequireDefault(_autocomplete);
+
+var _imageChanger = require('./image-changer.directive');
+
+var _imageChanger2 = _interopRequireDefault(_imageChanger);
+
+var _imageChecker = require('./image-checker.directive');
+
+var _imageChecker2 = _interopRequireDefault(_imageChecker);
+
+var _descriptionValidator = require('./description-validator.directive');
+
+var _descriptionValidator2 = _interopRequireDefault(_descriptionValidator);
+
+var _ingredientBuilder = require('./ingredient-builder.directive');
+
+var _ingredientBuilder2 = _interopRequireDefault(_ingredientBuilder);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -37229,13 +37390,72 @@ componentsModule.component('listErrors', _listErrors2.default);
 
 componentsModule.directive('showAuthed', _showAuthed2.default);
 
-componentsModule.directive('editableRow', _editableRow2.default);
-
 componentsModule.directive('autoComplete', _autocomplete2.default);
+
+componentsModule.directive('imageChanger', _imageChanger2.default);
+
+componentsModule.directive('imageChecker', _imageChecker2.default);
+
+componentsModule.directive('descriptionValidator', _descriptionValidator2.default);
+
+componentsModule.directive('ingredientBuilder', _ingredientBuilder2.default);
 
 exports.default = componentsModule;
 
-},{"./autocomplete.directive":8,"./editable-row.directive":9,"./list-errors.component":11,"./show-authed.directive":12,"angular":3}],11:[function(require,module,exports){
+},{"./autocomplete.directive":8,"./description-validator.directive":9,"./image-changer.directive":10,"./image-checker.directive":11,"./ingredient-builder.directive":13,"./list-errors.component":14,"./show-authed.directive":15,"angular":3}],13:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = IngredientBuilder;
+function IngredientBuilder() {
+  'ngInject';
+
+  return {
+    restrict: 'A',
+    scope: {
+      ingredients: "="
+    },
+    link: function link(scope, element) {
+      var ingredients = scope.ingredients;
+      var length = ingredients.length;
+      var remaining;
+      var subList;
+      var ingredientString = "";
+
+      // More then 6 elements
+      if (length > 6) {
+        remaining = length - 6;
+        subList = ingredients.splice(0, 6);
+
+        for (var i = 0; i < subList.length; i++) {
+          if (i == subList.length - 1) {
+            ingredientString += subList[i] + " ";
+          } else {
+            ingredientString += subList[i] + ", ";
+          }
+        }
+        ingredientString += "<strong>and " + remaining + " more</strong>";
+
+        // Less than 6 elements
+      } else {
+        for (var j = 0; j < length - 1; j++) {
+          if (j == length - 2) {
+            ingredientString += ingredients[j] + " ";
+          } else {
+            ingredientString += ingredients[j] + ", ";
+          }
+        }
+        ingredientString += " and " + ingredients.pop();
+      }
+
+      angular.element(element).append(ingredientString);
+    }
+  };
+}
+
+},{}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -37250,7 +37470,7 @@ var ListErrors = {
 
 exports.default = ListErrors;
 
-},{}],12:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 ShowAuthed.$inject = ["User"];
@@ -37289,7 +37509,7 @@ function ShowAuthed(User) {
 
 exports.default = ShowAuthed;
 
-},{}],13:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 AppConfig.$inject = ["$httpProvider", "$stateProvider", "$locationProvider", "$urlRouterProvider"];
@@ -37329,7 +37549,7 @@ function AppConfig($httpProvider, $stateProvider, $locationProvider, $urlRouterP
 
 exports.default = AppConfig;
 
-},{"./auth.interceptor":17}],14:[function(require,module,exports){
+},{"./auth.interceptor":20}],17:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -37338,12 +37558,13 @@ Object.defineProperty(exports, "__esModule", {
 var AppConstants = {
   api: 'http://localhost:3000/api',
   jwtKey: 'jwtToken',
-  appName: 'RecipeDB'
+  appName: 'RecipeDB',
+  registerKey: 'pass'
 };
 
 exports.default = AppConstants;
 
-},{}],15:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 AppRun.$inject = ["AppConstants", "$rootScope"];
@@ -37378,23 +37599,24 @@ function AppRun(AppConstants, $rootScope) {
 
 exports.default = AppRun;
 
-},{}],16:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 "use strict";
 
 angular.module("templates", []).run(["$templateCache", function ($templateCache) {
-  $templateCache.put("auth/auth.html", "<div class=\"auth-page\">\n  <div class=\"container page\">\n    <div class=\"row\">\n\n      <div class=\"col-md-6 col-md-offset-3 col-xs-12\">\n        <h1 class=\"text-center form-header\" ng-bind=\"::$ctrl.title\">Login</h1>\n\n        <list-errors errors=\"$ctrl.errors\"></list-errors>\n\n        <form ng-submit=\"$ctrl.submitForm()\">\n          <fieldset ng-disabled=\"$ctrl.isSubmitting\">\n\n            <fieldset class=\"form-group\">\n              <input class=\"form-control input-lg\"\n                type=\"text\"\n                placeholder=\"Email\"\n                ng-model=\"$ctrl.formData.email\" />\n            </fieldset>\n\n            <fieldset class=\"form-group\">\n              <input class=\"form-control input-lg\"\n                type=\"password\"\n                placeholder=\"Password\"\n                ng-model=\"$ctrl.formData.password\" />\n            </fieldset>\n\n            <button class=\"btn btn-lg btn-primary pull-xs-right\"\n              type=\"submit\" ng-bind=\"::$ctrl.title\"></button>\n\n          </fieldset>\n        </form>\n      </div>\n\n    </div>\n  </div>\n</div>\n");
+  $templateCache.put("auth/auth.html", "<div class=\"auth-page\">\n  <div class=\"container page\">\n    <div class=\"row\">\n      <div class=\"login-center\">\n\n\n        <form ng-submit=\"$ctrl.submitForm()\" id=\"authentication\">\n          <fieldset ng-disabled=\"$ctrl.isSubmitting\">\n            <h1 class=\"text-center form-header\" ng-bind=\"::$ctrl.title\">Login</h1>\n            <span class=\"error\" ng-show=\"$ctrl.errors.email\">Email {{$ctrl.errors.email}}</span>\n            <span class=\"error\" ng-show=\"$ctrl.errors[\'email or password\']\">Email or password {{$ctrl.errors[\'email or password\']}}</span>\n            <fieldset>\n              <input\n                type=\"text\"\n                placeholder=\"EMAIL\"\n                ng-model=\"$ctrl.formData.email\" />\n            </fieldset>\n\n            <fieldset>\n              <span class=\"error\" ng-show=\"$ctrl.errors.password\">Password {{$ctrl.errors.password}}</span>\n              <input\n                type=\"password\"\n                placeholder=\"PASSWORD\"\n                ng-model=\"$ctrl.formData.password\" />\n            </fieldset>\n\n            <button class=\"btn btn-lg btn-primary pull-xs-right\"\n              type=\"submit\" ng-bind=\"::$ctrl.title\"></button>\n\n          </fieldset>\n        </form>\n      </div>\n\n    </div>\n  </div>\n</div>\n");
+  $templateCache.put("auth/register.html", "<div class=\"auth-page\">\n  <div class=\"container page\">\n    <div class=\"row\">\n      <div class=\"login-center\">\n\n\n        <form ng-submit=\"$ctrl.submitForm()\" id=\"authentication\">\n          <fieldset ng-disabled=\"$ctrl.isSubmitting\">\n            <h1 class=\"text-center form-header\" ng-bind=\"::$ctrl.title\">REGISTER</h1>\n            <fieldset>\n              <span class=\"error\" ng-bind=\"$ctrl.errors.username\"></span>\n              <input\n                type=\"text\"\n                placeholder=\"USERNAME\"\n                ng-model=\"$ctrl.formData.username\" />\n            </fieldset>\n\n            <fieldset>\n              <span class=\"error\" ng-bind=\"$ctrl.errors.email\"></span>\n              <input\n                type=\"text\"\n                placeholder=\"EMAIL\"\n                ng-model=\"$ctrl.formData.email\" />\n            </fieldset>\n\n            <fieldset class=\"form-group\">\n              <span class=\"error\" ng-bind=\"$ctrl.errors.password\"></span>\n              <input\n                type=\"password\"\n                placeholder=\"PASSWORD\"\n                ng-model=\"$ctrl.formData.password\" />\n            </fieldset>\n\n            <fieldset class=\"form-group\">\n              <span class=\"error\" ng-bind=\"$ctrl.errors.registerKey\"></span>\n              <input\n                type=\"password\"\n                placeholder=\"REGISTER KEY\"\n                ng-model=\"$ctrl.formData.registerKey\" />\n            </fieldset>\n\n            <button class=\"btn btn-lg btn-primary pull-xs-right\"\n              type=\"submit\" ng-bind=\"::$ctrl.title\"></button>\n\n          </fieldset>\n        </form>\n      </div>\n\n    </div>\n  </div>\n</div>\n");
   $templateCache.put("components/list-errors.html", "<ul class=\"error-messages\" ng-show=\"$ctrl.errors\">\n  <div ng-repeat=\"(field, errors) in $ctrl.errors\">\n    <li ng-repeat=\"error in errors\">\n      {{field}} {{error}}\n    </li>\n  </div>\n</ul>\n");
-  $templateCache.put("editor/editor.html", "<div class=\"editor-page\">\n  <div class=\"container page\">\n    <div class=\"row\">\n      <div class=\"col-md-10 offset-md-1 col-xs-12\">\n\n        <list-errors errors=\"$ctrl.errors\"></list-errors>\n\n        <form>\n          <fieldset ng-disabled=\"$ctrl.isSubmitting\">\n\n            <fieldset class=\"form-group\">\n              <input class=\"form-control form-control-lg\"\n                ng-model=\"$ctrl.recipe.title\"\n                type=\"text\"\n                placeholder=\"Recipe Title\" />\n            </fieldset>\n\n            <fieldset class=\"form-group\">\n              <textarea class=\"form-control\"\n                rows=\"8\"\n                ng-model=\"$ctrl.recipe.body\"\n                placeholder=\"Write your recipe (in markdown)\">\n              </textarea>\n            </fieldset>\n\n            <fieldset class=\"form-group\">\n              <input type=\"text\" class=\"form-control\"\n                ng-model=\"$ctrl.recipe.image\"\n                placeholder=\"http://mylinktoimage.be/image.jpg\">\n              </input>\n            </fieldset>\n\n            <fieldset class=\"form-group\">\n              <input class=\"form-control\"\n                type=\"text\"\n                placeholder=\"Enter ingredient\"\n                ng-model=\"$ctrl.ingredientField\"\n                ng-keyup=\"$event.keyCode == 13 && $ctrl.addIngredient()\"/>\n\n              <div class=\"tag-list\">\n                <span ng-repeat=\"ingredient in $ctrl.recipe.ingredients\"\n                  class=\"tag-default tag-pill\">\n                  <i class=\"ion-close-round\" ng-click=\"$ctrl.removeIngredient(ingredient)\"></i>\n                  {{ ingredient }}\n                </span>\n              </div>\n            </fieldset>\n\n            <button class=\"btn btn-lg pull-xs-right btn-primary\" type=\"button\" ng-click=\"$ctrl.submit()\">\n              Publish Recipe\n            </button>\n\n          </fieldset>\n        </form>\n\n      </div>\n    </div>\n  </div>\n</div>\n");
-  $templateCache.put("home/home.html", " <div class=\"home-page\">\n\n  <!-- Splash banner that only shows when not logged in -->\n  <div class=\"banner\">\n    <div class=\"container\">\n      <h1 class=\"logo-font\" ng-bind=\"::title\"></h1>\n    </div>\n  </div>\n\n</div>\n");
+  $templateCache.put("editor/editor.html", "<div class=\"editor-page\">\n  <form id=\"editorForm\">\n    <div class=\"editor-hero-image-upload\" id=\"editorHeroImage\">\n      <i class=\"ion-close-round hidden close\" id=\"closeButton\"></i>\n      <div class=\"editor-add-image\" id=\"addImageBox\">\n        <div class=\"editor-title-image\">Add your image</div>\n        <input type=\"text\" id=\"addImage\" placeholder=\"url to image\" ng-model=\"$ctrl.image\" image-changer recipeimage=\"$ctrl.recipe.image\" image=\"$ctrl.image\" autocomplete=\"off\"/>\n      </div>\n    </div>\n    <div class=\"container page\">\n      <div class=\"row\">\n        <div class=\"col-md-offset-3 col-md-6 col-xs-12\">\n\n            <fieldset ng-disabled=\"$ctrl.isSubmitting\">\n\n              <fieldset>\n                <span class=\"error\" ng-bind=\"$ctrl.errors.title\"></span>\n                <input class=\"custom recipe-title\"\n                  id=\"recipeTitle\"\n                  ng-model=\"$ctrl.recipe.title\"\n                  type=\"text\"\n                  placeholder=\"Title\" />\n              </fieldset>\n\n              <fieldset class=\"form-group\">\n                <div class=\"input-header\">\n                  Description\n                </div>\n                <span class=\"error\" ng-bind=\"$ctrl.errors.description\"></span>\n                <div class=\"description\">\n                  <textarea\n                    class=\"custom\"\n                    rows=\"3\"\n                    cols=\"50\"\n                    maxlength=\"4000\"\n                    ng-model=\"$ctrl.recipe.body\"\n                    placeholder=\"Tell us something about the recipe\"\n                    description-validator\n                    value=\"$ctrl.recipe.body\"\n                    errors = $ctrl.errors\n                    >\n                  </textarea>\n                </div>\n              </fieldset>\n\n              <fieldset>\n                <div class=\"input-header\">\n                  Ingredients\n                  <label for=\"numberOfServings\" class=\"section-header-small\">\n                    PORTIONS\n                    <input class=\"small-input\" maxlength=\"4\" name=\"numberOfServings\" type=\"text\" ng-model=\"$ctrl.recipe.portions\"/>\n                  </label>\n                </div>\n\n                <div class=\"ingredients-list all-list\">\n                  <span class=\"error\" ng-bind=\"$ctrl.errors.portions\"></span>\n                  <span class=\"error\" ng-bind=\"$ctrl.errors.ingredients\"></span>\n                  <div class=\"line-wrapper ing-wrapper\">\n                    <textarea\n                      class=\"custom ingredient-text\"\n                      maxlength=\"1000\"\n                      name=\"ingredientLines\"\n                      type=\"text\"\n                      placeholder=\"Add ingredient (for example 2tsp sugar)\"\n                      rows=\"1\"\n                      cols=\"50\"\n                      ng-model=\"$ctrl.ingredientField\"\n                      ng-keyup=\"$event.keyCode == 13 && $ctrl.addIngredient()\"\n                      onkeydown=\"if(event.keyCode == 13) return false;\"\n                      ></textarea>\n                  </div>\n                  <div class=\"line-wrapper ing-wrapper\" ng-repeat=\"ingredient in $ctrl.recipe.ingredients\">\n                    <textarea class=\"custom ingredient-text\"\n                    maxlength=\"1000\"\n                    name=\"ingredientLines\"\n                    type=\"text\"\n                    placeholder=\"Add ingredient (for example 2tsp sugar)\"\n                    readonly=\"true\"\n                    >{{ingredient}}</textarea>\n                    <i class=\"delete-row\"\n                      ng-click=\"$ctrl.removeIngredient(ingredient)\"></i>\n                  </div>\n                </div>\n              </fieldset>\n                <fieldset>\n                  <div class=\"input-header\">\n                    Instructions\n                  </div>\n\n                  <div class=\"prep-steps all-list\">\n                    <span class=\"error\" ng-bind=\"$ctrl.errors.instructions\"></span>\n                    <div class=\"line-wrapper step-wrapper-input\">\n                      <textarea\n                        class=\"custom ingredient-text\"\n                        maxlength=\"1000\"\n                        name=\"instructionLines\"\n                        type=\"text\"\n                        placeholder=\"Add instruction\"\n                        rows=\"1\"\n                        cols=\"50\"\n                        ng-model=\"$ctrl.instructionField\"\n                        ng-keyup=\"$event.keyCode == 13 && $ctrl.addInstruction()\"\n                        onkeydown=\"if(event.keyCode == 13) return false;\"\n                        ></textarea>\n                    </div>\n                    <div class=\"line-wrapper step-wrapper\" ng-repeat=\"instruction in $ctrl.recipe.instructions\">\n                      <textarea class=\"custom ingredient-text\"\n                      maxlength=\"1000\"\n                      name=\"instructionLines\"\n                      type=\"text\"\n                      placeholder=\"Add instruction\"\n                      readonly=\"true\"\n                      >{{instruction}}</textarea>\n                      <i class=\"delete-row\"\n                        ng-click=\"$ctrl.removeInstruction(instruction)\"></i>\n                    </div>\n                  </div>\n                </fieldset>\n\n              <button class=\"btn btn-lg pull-xs-right btn-main\" type=\"button\" ng-click=\"$ctrl.submit()\">\n                Publish Recipe\n              </button>\n\n            </fieldset>\n        </div>\n      </div>\n    </div>\n  </form>\n</div>\n");
+  $templateCache.put("home/home.html", " <div class=\"home-page\">\n\n  <!-- Splash banner that only shows when not logged in -->\n</div>\n");
   $templateCache.put("layout/app-view.html", "<app-header></app-header>\n\n<div ui-view></div>\n\n<app-footer></app-footer>\n");
   $templateCache.put("layout/footer.html", "<footer>\n  <div class=\"container\">\n    <a class=\"logo-font\" ui-sref=\"app.home\" ng-bind=\"::$ctrl.appName | lowercase\"></a>\n    <span class=\"attribution\">\n      &copy; {{::$ctrl.date | date:\'yyyy\'}} {{$ctrl.appName}}.\n      Code licensed under MIT.\n    </span>\n  </div>\n</footer>\n");
-  $templateCache.put("layout/header.html", "<nav class=\"navbar navbar-light\">\n  <div class=\"container\">\n\n    <a class=\"navbar-brand\"\n      ui-sref=\"app.home\"\n      ng-bind=\"::$ctrl.appName | lowercase\">\n    </a>\n\n    <!-- Show this for logged in users -->\n    <ul class=\"nav navbar-nav pull-xs-right\" show-authed=\"true\">\n      <li class=\"nav-item\">\n        <a class=\"nav-link\"\n          ui-sref-active=\"active\"\n          ui-sref=\"app.home\">\n          <i class=\"ion-ios-home\"></i>\n          &nbsp;Home\n        </a>\n      </li>\n\n      <li class=\"nav-item\">\n        <a class=\"nav-link\"\n          ui-sref-active=\"active\"\n          ui-sref=\"app.recipe\">\n          <i class=\"ion-clipboard\"></i>\n          &nbsp;Recipes\n        </a>\n      </li>\n\n      <li class=\"nav-item\">\n        <a class=\"nav-link\"\n          ui-sref-active=\"active\"\n          ui-sref=\"app.editor\">\n          <i class=\"ion-compose\"></i>\n          &nbsp;Add recipe\n        </a>\n      </li>\n\n      <li role=\"presentation\" class=\"dropdown nav-item\">\n        <a class=\"dropdown-toggle nav-link\"\n          data-toggle=\"dropdown\"\n          role=\"button\"\n          aria-haspopup=\"true\"\n          aria-expanded=\"false\">\n\n          <i class=\"ion-ios-gear\"></i>\n          &nbsp;Settings <span class=\"caret\"></span>\n        </a>\n\n        <ul class=\"dropdown-menu\">\n          <li class=\"nav-item\">\n            <a class=\"nav-link\"\n              ui-sref-active=\"active\"\n              ui-sref=\"app.settings\">\n              <i class=\"ion-ios-gear\"></i>\n              &nbsp;Settings\n            </a>\n          </li>\n\n          <li class=\"nav-item\">\n            <a class=\"nav-link\"\n              ui-sref-active=\"active\"\n              ui-sref=\"app.login\"\n              ng-click=\"$ctrl.logout()\">\n              <i class=\"ion-log-out\"></i>\n              &nbsp;Logout\n            </a>\n          </li>\n\n        </ul>\n      </li>\n    </ul>\n\n    <!-- Show when logged out -->\n    <ul class=\"nav navbar-nav pull-xs-right\" show-authed=\"false\">\n      <li class=\"nav-item\">\n        <a class=\"nav-link\"\n          ui-sref-active=\"active\"\n          ui-sref=\"app.home\">\n          <i class=\"ion-ios-home\"></i>\n          &nbsp;Home\n        </a>\n      </li>\n\n      <li class=\"nav-item\">\n        <a class=\"nav-link\"\n          ui-sref-active=\"active\"\n          ui-sref=\"app.recipe\">\n          <i class=\"ion-clipboard\"></i>\n          &nbsp;Recipes\n        </a>\n      </li>\n\n      <li class=\"nav-item\">\n        <a class=\"nav-link\"\n          ui-sref-active=\"active\"\n          ui-sref=\"app.login\">\n          <i class=\"ion-log-in\"></i>\n          &nbsp;Login\n        </a>\n      </li>\n    </ul>\n\n\n  </div>\n</nav>\n");
-  $templateCache.put("recipe/recipe.html", "<div class=\"home-page\">\n\n  <!-- Splash banner that only shows when not logged in -->\n  <div class=\"banner\">\n    <div class=\"container\">\n      <h1 class=\"logo-font\" ng-bind=\"::title\"></h1>\n    </div>\n  </div>\n\n  <div class=\"container\">\n    <div class=\"row\">\n      <div class=\"col-md-12 no-padding\">\n        <form class=\"\" role=\"search\">\n          <div class=\"form-group searchbar\" role=\"search\">\n            <input type=\"text\" class=\"form-control\" id=\"searchBar\" placeholder=\"Search Recipe\"\n            autocomplete=\"off\"\n            ng-model=\"$ctrl.searchbar\"\n            auto-complete\n            value=\"$ctrl.searchbar\"\n            keyup=\"$ctrl.autoComplete(filter)\"\n            list=\"$ctrl.autoList\">\n            <ul class=\"smart-list\" id=\"smartList\">\n            </ul>\n          </div>\n        </form>\n      </div>\n    </div>\n    <div class=\"row\">\n      <div class=\"media\" ng-repeat=\"recipe in $ctrl.recipes\">\n        <div class=\"media-body\">\n          <h4 class=\"media-heading\" ng-bind=\"::recipe.title\"></h4>\n          {{ recipe.body | limitTo: 500 }}\n        </div>\n\n        <div class=\"btn-group full\" role=\"group\">\n          <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">\n            Ingredients\n            <span class=\"caret\"></span>\n          </button>\n          <ul class=\"dropdown-menu\">\n            <li ng-repeat=\"ingredient in recipe.ingredients\">\n              <a href=\"#\">{{ingredient}}</a>\n            </li>\n          </ul>\n          <a ui-sref=\"/recipes/{{recipe.slug}}\">\n            <button type=\"submit\" class=\"btn btn-primary  btn-read\">Read</button>\n          </a>\n        </div>\n    </div>\n  </div>\n</div>\n");
-  $templateCache.put("recipedetail/recipedetail.html", "<div class=\"home-page\">\n\n  <!-- Splash banner that only shows when not logged in -->\n  <div class=\"banner\">\n    <div class=\"container\">\n      <h1 class=\"logo-font\" ng-bind=\"::$ctrl.recipe.title\"></h1>\n    </div>\n  </div>\n\n  <div class=\"container\">\n    <div ng-show=\"$ctrl.recipe.image\" class=\"recipe-hero-image\"></div>\n    <div class=\"recipe-info\">\n      <h4 ng-bind=\"$ctrl.recipe.title\"></h4>\n      <p ng-bind=\"$ctrl.recipe.body\"></p>\n    </div>\n    <div class=\"user-info\">\n      <p ng-bind=\"::$ctrl.recipe.author.username\"></p>\n    </div>\n    <div>\n      <!-- Back button -->\n    </div>\n  </div>\n\n</div>\n");
+  $templateCache.put("layout/header.html", "<nav class=\"navbar navbar-light\">\n  <div class=\"container\">\n\n    <a class=\"navbar-brand\"\n      ui-sref=\"app.recipe\"\n      ng-bind=\"::$ctrl.appName | lowercase\">\n    </a>\n\n    <div id=\"mobileMenu\" class=\"pull-xs-right hidden\">\n      <i class=\"ion-navicon-round\"></i>\n    </div>\n\n    <!-- Show this for logged in users -->\n    <ul id=\"navBar\" class=\"nav navbar-nav pull-xs-right\" show-authed=\"true\">\n\n      <li class=\"nav-item\">\n        <a class=\"nav-link\"\n          ui-sref-active=\"active\"\n          ui-sref=\"app.recipe\">\n          <i class=\"ion-clipboard\"></i>\n          &nbsp;Recipes\n        </a>\n      </li>\n\n      <li class=\"nav-item\">\n        <a class=\"nav-link\"\n          ui-sref-active=\"active\"\n          ui-sref=\"app.editor\">\n          <i class=\"ion-compose\"></i>\n          &nbsp;Add recipe\n        </a>\n      </li>\n\n      <li role=\"presentation\" class=\"dropdown nav-item\">\n        <a class=\"dropdown-toggle nav-link\"\n          data-toggle=\"dropdown\"\n          role=\"button\"\n          aria-haspopup=\"true\"\n          aria-expanded=\"false\">\n\n          <i class=\"ion-ios-gear\"></i>\n          &nbsp;Settings <span class=\"caret\"></span>\n        </a>\n\n        <ul class=\"dropdown-menu\">\n          <li class=\"nav-item\">\n            <a class=\"nav-link\"\n              ui-sref-active=\"active\"\n              ui-sref=\"app.login\"\n              ng-click=\"$ctrl.logout()\">\n              <i class=\"ion-log-out\"></i>\n              &nbsp;Logout\n            </a>\n          </li>\n\n        </ul>\n      </li>\n    </ul>\n\n    <!-- Show when logged out -->\n    <ul id=\"navBar\" class=\"nav navbar-nav pull-xs-right\" show-authed=\"false\">\n\n      <li class=\"nav-item\">\n        <a class=\"nav-link\"\n          ui-sref-active=\"active\"\n          ui-sref=\"app.register\">\n          <i class=\"ion-person-add\"></i>\n          &nbsp;Sign up\n        </a>\n      </li>\n\n      <li class=\"nav-item\">\n        <a class=\"nav-link\"\n          ui-sref-active=\"active\"\n          ui-sref=\"app.login\">\n          <i class=\"ion-log-in\"></i>\n          &nbsp;Login\n        </a>\n      </li>\n    </ul>\n\n\n  </div>\n</nav>\n");
+  $templateCache.put("recipe/recipe.html", "<div class=\"home-page\">\n  <div class=\"container\">\n    <div class=\"row\">\n      <div class=\"col-md-12 no-padding\">\n        <form class=\"\" role=\"search\">\n          <div class=\"form-group searchbar\" role=\"search\">\n            <input type=\"text\" class=\"\" id=\"searchBar\" placeholder=\"Search Recipe\"\n            autocomplete=\"off\"\n            ng-model=\"$ctrl.searchbar\"\n            auto-complete\n            value=\"$ctrl.searchbar\"\n            keyup=\"$ctrl.autoComplete(filter)\"\n            list=\"$ctrl.autoList\">\n            <ul class=\"smart-list\" id=\"smartList\">\n            </ul>\n          </div>\n        </form>\n      </div>\n    </div>\n    <div class=\"row\">\n      <div class=\"grid\">\n        <div class=\"recipe\"\n          ng-repeat=\"recipe in $ctrl.recipes\"\n          image-checker\n          image=\"recipe.image\">\n          <a ui-sref=\"app.recipedetail({slug: recipe.slug})\"></a>\n          <div class=\"recipe-info\">\n            <h5 class=\"recipe-title\">\n              <span ng-bind=\"recipe.title\"></span>\n            </h5>\n            <span class=\"recipe-source\" ng-bind=\"recipe.author.username\"></span>\n            <p class=\"recipe-ingredients\"\n              ingredient-builder\n              ingredients=\"recipe.ingredients\"\n            ></p>\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>\n\n<!--\n<div class=\"media\" ng-repeat=\"recipe in $ctrl.recipes\">\n  <div class=\"media-body\">\n    <h4 class=\"media-heading\" ng-bind=\"::recipe.title\"></h4>\n    {{ recipe.body | limitTo: 500 }}\n  </div>\n\n  <div class=\"btn-group full\" role=\"group\">\n    <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">\n      Ingredients\n      <span class=\"caret\"></span>\n    </button>\n    <ul class=\"dropdown-menu\">\n      <li ng-repeat=\"ingredient in recipe.ingredients\">\n        <a href=\"#\">{{ingredient}}</a>\n      </li>\n    </ul>\n    <a ui-sref=\"/recipes/{{recipe.slug}}\">\n      <button type=\"submit\" class=\"btn btn-primary  btn-read\">Read</button>\n    </a>\n  </div>\n\n-->\n");
+  $templateCache.put("recipedetail/recipedetail.html", "<div class=\"home-page\">\n  <div class=\"container\">\n    <div class=\"row\">\n      <div class=\"recipe-detail\">\n        <div class=\"recipe-details\" style=\"background-image: url({{$ctrl.recipe.image}});\">\n          <i class=\"ion-ios-close-empty close\" ui-sref=\"app.recipe\"></i>\n          <i class=\"ion-edit edit\"\n            ui-sref=\"app.editor({slug: $ctrl.recipe.slug})\"\n            ng-show=\"$ctrl.isUser\"></i>\n          <div class=\"wrapper\">\n            <div class=\"primary-info\">\n              <h1 ng-bind=\"$ctrl.recipe.title\"></h1>\n              <span class=\"source\" ng-bind=\"$ctrl.recipe.author.username\"></span>\n            </div>\n          </div>\n        </div>\n        <div class=\"recipe-summary\">\n          <div class=\"wrapper\">\n            <div class=\"recipe-summary-item\">\n              <span class=\"value\">{{$ctrl.recipe.ingredients.length}}</span>\n              <label>Ingredients</label>\n            </div>\n            <div class=\"recipe-summary-item middle\">\n              <span class=\"value\">{{$ctrl.recipe.instructions.length}}</span>\n              <label>Instructions</label>\n            </div>\n            <div class=\"recipe-summary-item\">\n              <span class=\"value\">{{$ctrl.recipe.portions}}</span>\n              <label>Portions</label>\n            </div>\n          </div>\n        </div>\n        <div class=\"recipe-ingredients wrapper\">\n          <h3>Ingredients</h3>\n          <div class=\"list\">\n            <div class=\"ingredient-line\"\n              ng-repeat=\"ingredient in $ctrl.recipe.ingredients\">\n              {{ingredient}}\n            </div>\n          </div>\n        </div>\n        <div class=\"recipe-instructions wrapper\">\n          <h3>Instructions</h3>\n          <div class=\"prep-steps all-list\">\n            <div class=\"line-wrapper step-wrapper\" ng-repeat=\"instruction in $ctrl.recipe.instructions\">\n              <p class=\"custom\">\n                {{instruction}}\n              </p>\n            </div>\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>\n");
   $templateCache.put("settings/settings.html", "<div class=\"auth-page\">\n  <div class=\"container page\">\n    <div class=\"row\">\n\n      <div class=\"col-md-6 col-md-offset-3 col-xs-12\">\n        <h1 class=\"text-center form-header\" ng-bind=\"::$ctrl.title\">Login</h1>\n\n        <list-errors errors=\"$ctrl.errors\"></list-errors>\n\n        <form ng-submit=\"$ctrl.submitForm()\">\n          <fieldset ng-disabled=\"$ctrl.isSubmitting\">\n\n            <fieldset class=\"form-group\">\n              <input class=\"form-control input-lg\"\n                type=\"text\"\n                placeholder=\"Email\"\n                ng-model=\"$ctrl.formData.email\" />\n            </fieldset>\n\n            <fieldset class=\"form-group\">\n              <input class=\"form-control input-lg\"\n                type=\"password\"\n                placeholder=\"Password\"\n                ng-model=\"$ctrl.formData.password\" />\n            </fieldset>\n\n            <button class=\"btn btn-lg btn-primary pull-xs-right\"\n              type=\"submit\" ng-bind=\"::$ctrl.title\"></button>\n\n          </fieldset>\n        </form>\n      </div>\n\n    </div>\n  </div>\n</div>\n");
 }]);
 
-},{}],17:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 authInterceptor.$inject = ["JWT", "AppConstants", "$window", "$q"];
@@ -37429,7 +37651,7 @@ function authInterceptor(JWT, AppConstants, $window, $q) {
 
 exports.default = authInterceptor;
 
-},{}],18:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 'use strict';
 
 EditorConfig.$inject = ["$stateProvider"];
@@ -37458,12 +37680,12 @@ function EditorConfig($stateProvider) {
               return recipe;
               // Redirect to homepage
             } else {
-              $state.go('app.home');
+              $state.go('app.editor');
             }
           },
           // If an error occurs -> redirect to homepage
           function () {
-            return $state.go('app.home');
+            return $state.go('app.recipe');
           });
           // If new article
         } else {
@@ -37476,8 +37698,8 @@ function EditorConfig($stateProvider) {
 
 exports.default = EditorConfig;
 
-},{}],19:[function(require,module,exports){
-'use strict';
+},{}],22:[function(require,module,exports){
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -37496,43 +37718,106 @@ var EditorController = function () {
 
     this._Recipes = Recipes;
     this._$state = $state;
+    this.errors = [{
+      title: "",
+      description: "",
+      ingredients: "",
+      instructions: "",
+      portions: ""
+    }];
+    this.image = "";
 
     if (!recipe) {
       this.recipe = {
         title: '',
         body: '',
+        instructions: [],
         image: '',
-        ingredients: []
+        ingredients: [],
+        portions: ''
       };
     } else {
       this.recipe = recipe;
+      this.image = this.recipe.image;
     }
   }
 
   _createClass(EditorController, [{
-    key: 'addIngredient',
-    value: function addIngredient() {
-      if (!this.recipe.ingredients.includes(this.ingredientField)) {
-        this.recipe.ingredients.push(this.ingredientField);
-        this.ingredientField = '';
+    key: "addInstruction",
+    value: function addInstruction() {
+      if (!this.recipe.ingredients.includes(this.instructionField) && this.instructionField.length > 1) {
+        this.recipe.instructions.push(this.instructionField);
+        this.instructionField = '';
+        this.errors['instructions'] = "";
+      } else {
+        this.errors['instructions'] = "Instructions should have more than 1 character";
       }
     }
   }, {
-    key: 'removeIngredient',
+    key: "removeInstruction",
+    value: function removeInstruction(instruction) {
+      this.recipe.instructions = this.recipe.instructions.filter(function (temp) {
+        return temp != instruction;
+      });
+    }
+  }, {
+    key: "addIngredient",
+    value: function addIngredient() {
+      if (!this.recipe.ingredients.includes(this.ingredientField) && this.ingredientField.length > 1) {
+        this.recipe.ingredients.push(this.ingredientField);
+        this.ingredientField = '';
+        this.errors['ingredients'] = "";
+      } else {
+        this.errors['ingredients'] = "Ingredient should have more than 1 character";
+      }
+    }
+  }, {
+    key: "removeIngredient",
     value: function removeIngredient(ingredient) {
       this.recipe.ingredients = this.recipe.ingredients.filter(function (slug) {
         return slug != ingredient;
       });
     }
   }, {
-    key: 'submit',
+    key: "submit",
     value: function submit() {
       var _this = this;
 
-      this.isSubmitting = true;
+      var validForm = true;
 
+      if (!this.recipe.title.length > 0) {
+        validForm = false;
+        this.errors['title'] = "Title should be filled in";
+      }
+
+      if (!this.recipe.body.length > 0) {
+        validForm = false;
+        this.errors['description'] = "Description should be filled in";
+      }
+
+      if (!this.recipe.image.length > 0) {
+        this.recipe.image = "";
+      }
+      if (!this.recipe.instructions.length > 0) {
+        validForm = false;
+        this.errors['instructions'] = "You should add atleast one instruction";
+      }
+      if (!this.recipe.ingredients.length > 0) {
+        validForm = false;
+        this.errors['ingredients'] = "You should add atleast one ingredient";
+      }
+      if (!this.recipe.portions.length > 0) {
+        validForm = false;
+        this.errors['portions'] = "You should fill in how many portions this recipe yields";
+      }
+
+      if (!validForm) {
+        return;
+      }
+
+      this.isSubmitting = true;
       this._Recipes.save(this.recipe).then(function (newRecipe) {
-        _this._$state.go('app.recipe', { slug: newRecipe.slug });
+        _this._$state.go('app.recipedetail', { slug: newRecipe.slug });
       }, function (err) {
         _this.isSubmitting = false;
         _this.errors = err.data.errors;
@@ -37545,7 +37830,7 @@ var EditorController = function () {
 
 exports.default = EditorController;
 
-},{}],20:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -37579,7 +37864,7 @@ editorModule.controller('EditorController', _editor4.default);
 
 exports.default = editorModule;
 
-},{"./editor.config":18,"./editor.controller":19,"angular":3}],21:[function(require,module,exports){
+},{"./editor.config":21,"./editor.controller":22,"angular":3}],24:[function(require,module,exports){
 'use strict';
 
 HomeConfig.$inject = ["$stateProvider"];
@@ -37599,7 +37884,7 @@ function HomeConfig($stateProvider) {
   });
 }
 
-},{}],22:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -37608,18 +37893,19 @@ Object.defineProperty(exports, "__esModule", {
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var HomeCtrl = function HomeCtrl(AppConstants) {
+var HomeCtrl = function HomeCtrl(AppConstants, $location) {
   'ngInject';
 
   _classCallCheck(this, HomeCtrl);
 
   this.appName = AppConstants.appName;
+  $location.path('/recipes');
 };
-HomeCtrl.$inject = ["AppConstants"];
+HomeCtrl.$inject = ["AppConstants", "$location"];
 
 exports.default = HomeCtrl;
 
-},{}],23:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -37653,7 +37939,7 @@ homeModule.controller('HomeCtrl', _home4.default);
 
 exports.default = homeModule;
 
-},{"./home.config":21,"./home.controller":22,"angular":3}],24:[function(require,module,exports){
+},{"./home.config":24,"./home.controller":25,"angular":3}],27:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -37681,7 +37967,7 @@ var AppFooter = {
 
 exports.default = AppFooter;
 
-},{}],25:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -37707,7 +37993,7 @@ var AppHeader = {
 
 exports.default = AppHeader;
 
-},{}],26:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -37739,7 +38025,7 @@ layoutModule.component('appFooter', _footer2.default);
 
 exports.default = layoutModule;
 
-},{"./footer.component":24,"./header.component":25,"angular":3}],27:[function(require,module,exports){
+},{"./footer.component":27,"./header.component":28,"angular":3}],30:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -37773,7 +38059,7 @@ recipeModule.controller('RecipeController', _recipe4.default);
 
 exports.default = recipeModule;
 
-},{"./recipe.config":28,"./recipe.controller":29,"angular":3}],28:[function(require,module,exports){
+},{"./recipe.config":31,"./recipe.controller":32,"angular":3}],31:[function(require,module,exports){
 'use strict';
 
 RecipeConfig.$inject = ["$stateProvider", "$httpProvider"];
@@ -37792,6 +38078,9 @@ function RecipeConfig($stateProvider, $httpProvider) {
     templateUrl: 'recipe/recipe.html',
     title: 'Recipes',
     resolve: {
+      auth: ["User", function auth(User) {
+        return User.ensureAuthIs(true);
+      }],
       recipes: ["Recipes", function recipes(Recipes) {
         return Recipes.getRecipes();
       }]
@@ -37799,7 +38088,7 @@ function RecipeConfig($stateProvider, $httpProvider) {
   });
 }
 
-},{}],29:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37842,7 +38131,7 @@ var RecipeController = function () {
 
 exports.default = RecipeController;
 
-},{}],30:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -37876,7 +38165,7 @@ recipeDetailModule.controller('RecipeDetailController', _recipedetail4.default);
 
 exports.default = recipeDetailModule;
 
-},{"./recipedetail.config":31,"./recipedetail.controller":32,"angular":3}],31:[function(require,module,exports){
+},{"./recipedetail.config":34,"./recipedetail.controller":35,"angular":3}],34:[function(require,module,exports){
 'use strict';
 
 RecipeDetailConfig.$inject = ["$stateProvider", "$httpProvider"];
@@ -37895,15 +38184,17 @@ function RecipeDetailConfig($stateProvider, $httpProvider) {
     templateUrl: 'recipedetail/recipedetail.html',
     title: "Recipe",
     resolve: {
+      auth: ["User", function auth(User) {
+        return User.ensureAuthIs(true);
+      }],
       recipe: ["Recipes", "$stateParams", function recipe(Recipes, $stateParams) {
-        console.log($stateParams);
         return Recipes.getRecipe($stateParams.slug);
       }]
     }
   });
 }
 
-},{}],32:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -37912,7 +38203,7 @@ Object.defineProperty(exports, "__esModule", {
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var RecipeDetailController = function RecipeDetailController(Recipes, recipe, $window) {
+var RecipeDetailController = function RecipeDetailController(Recipes, recipe, $window, User) {
   'ngInject';
 
   _classCallCheck(this, RecipeDetailController);
@@ -37920,12 +38211,51 @@ var RecipeDetailController = function RecipeDetailController(Recipes, recipe, $w
   this._Recipes = Recipes;
   this._$window = $window;
   this.recipe = recipe;
+
+  if (User.current) {
+    this.isUser = User.current.username === this.recipe.author.username;
+  } else {
+    this.isUser = false;
+  }
 };
-RecipeDetailController.$inject = ["Recipes", "recipe", "$window"];
+RecipeDetailController.$inject = ["Recipes", "recipe", "$window", "User"];
 
 exports.default = RecipeDetailController;
 
-},{}],33:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
+'use strict';
+
+angular.element(document).ready(function () {
+
+  var windowWidth = angular.element(window).innerWidth();
+  if (windowWidth < 775) {
+    angular.element('#mobileMenu').removeClass('hidden');
+    angular.element('.nav').addClass('hidden');
+  }
+
+  angular.element(window).resize(function () {
+    console.log(window.innerWidth);
+    if (window.innerWidth < 775) {
+      angular.element("#mobileMenu").removeClass('hidden');
+      angular.element('.nav').addClass('hidden');
+    } else {
+      angular.element("#mobileMenu").addClass('hidden');
+      angular.element('.nav').removeClass('hidden');
+    }
+  });
+
+  angular.element('#mobileMenu').on('click', function () {
+    angular.element("#mobileMenu").addClass('hidden');
+    angular.element('.nav').removeClass('hidden');
+
+    angular.element('.nav li a').on('click', function () {
+      angular.element("#mobileMenu").removeClass('hidden');
+      angular.element('.nav').addClass('hidden');
+    });
+  });
+});
+
+},{}],37:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -37963,7 +38293,7 @@ servicesModule.service('Recipes', _recipes2.default);
 
 exports.default = servicesModule;
 
-},{"./jwt.service":34,"./recipes.service":35,"./user.service":36,"angular":3}],34:[function(require,module,exports){
+},{"./jwt.service":38,"./recipes.service":39,"./user.service":40,"angular":3}],38:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -38007,7 +38337,7 @@ var JWT = function () {
 
 exports.default = JWT;
 
-},{}],35:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -38072,7 +38402,7 @@ var Recipes = function () {
       }).then(function (res) {
         return res.data;
       }, function (err) {
-        return console.log(err);
+        return err.data;
       });
     }
   }, {
@@ -38111,7 +38441,7 @@ var Recipes = function () {
 
 exports.default = Recipes;
 
-},{}],36:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -38200,11 +38530,12 @@ var User = function () {
     }
   }, {
     key: 'attemptAuth',
-    value: function attemptAuth(credentials) {
+    value: function attemptAuth(type, credentials) {
       var _this3 = this;
 
+      var route = type === 'login' ? '/login' : '';
       return this._$http({
-        url: this._AppConstants.api + '/users/login',
+        url: this._AppConstants.api + '/users' + route,
         method: 'POST',
         data: {
           user: credentials
@@ -38223,7 +38554,7 @@ var User = function () {
 
 exports.default = User;
 
-},{}],37:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -38257,7 +38588,7 @@ settingsModule.controller('SettingsController', _settings4.default);
 
 exports.default = settingsModule;
 
-},{"./settings.config":38,"./settings.controller":39,"angular":3}],38:[function(require,module,exports){
+},{"./settings.config":42,"./settings.controller":43,"angular":3}],42:[function(require,module,exports){
 'use strict';
 
 SettingsConfig.$inject = ["$stateProvider", "$httpProvider"];
@@ -38284,7 +38615,7 @@ function SettingsConfig($stateProvider, $httpProvider) {
 
 exports.default = SettingsConfig;
 
-},{}],39:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -38305,7 +38636,7 @@ SettingsController.$inject = ["$state"];
 
 exports.default = SettingsController;
 
-},{}],40:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 "use strict";
 
 /** 

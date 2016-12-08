@@ -44,7 +44,7 @@ export default class Recipes {
       method: 'GET'
     }).then(
       (res) => res.data,
-      (err) => console.log(err)
+      (err) => err.data
     );
 
   }

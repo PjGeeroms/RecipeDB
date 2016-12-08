@@ -1,24 +1,55 @@
 <div class="home-page">
-
-  <!-- Splash banner that only shows when not logged in -->
-  <div class="banner">
-    <div class="container">
-      <h1 class="logo-font" ng-bind="::$ctrl.recipe.title"></h1>
-    </div>
-  </div>
-
   <div class="container">
-    <div ng-show="$ctrl.recipe.image" class="recipe-hero-image"></div>
-    <div class="recipe-info">
-      <h4 ng-bind="$ctrl.recipe.title"></h4>
-      <p ng-bind="$ctrl.recipe.body"></p>
-    </div>
-    <div class="user-info">
-      <p ng-bind="::$ctrl.recipe.author.username"></p>
-    </div>
-    <div>
-      <!-- Back button -->
+    <div class="row">
+      <div class="recipe-detail">
+        <div class="recipe-details" style="background-image: url({{$ctrl.recipe.image}});">
+          <i class="ion-ios-close-empty close" ui-sref="app.recipe"></i>
+          <i class="ion-edit edit"
+            ui-sref="app.editor({slug: $ctrl.recipe.slug})"
+            ng-show="$ctrl.isUser"></i>
+          <div class="wrapper">
+            <div class="primary-info">
+              <h1 ng-bind="$ctrl.recipe.title"></h1>
+              <span class="source" ng-bind="$ctrl.recipe.author.username"></span>
+            </div>
+          </div>
+        </div>
+        <div class="recipe-summary">
+          <div class="wrapper">
+            <div class="recipe-summary-item">
+              <span class="value">{{$ctrl.recipe.ingredients.length}}</span>
+              <label>Ingredients</label>
+            </div>
+            <div class="recipe-summary-item middle">
+              <span class="value">{{$ctrl.recipe.instructions.length}}</span>
+              <label>Instructions</label>
+            </div>
+            <div class="recipe-summary-item">
+              <span class="value">{{$ctrl.recipe.portions}}</span>
+              <label>Portions</label>
+            </div>
+          </div>
+        </div>
+        <div class="recipe-ingredients wrapper">
+          <h3>Ingredients</h3>
+          <div class="list">
+            <div class="ingredient-line"
+              ng-repeat="ingredient in $ctrl.recipe.ingredients">
+              {{ingredient}}
+            </div>
+          </div>
+        </div>
+        <div class="recipe-instructions wrapper">
+          <h3>Instructions</h3>
+          <div class="prep-steps all-list">
+            <div class="line-wrapper step-wrapper" ng-repeat="instruction in $ctrl.recipe.instructions">
+              <p class="custom">
+                {{instruction}}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-
 </div>

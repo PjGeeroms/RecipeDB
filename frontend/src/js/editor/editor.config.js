@@ -22,11 +22,11 @@ function EditorConfig($stateProvider) {
                 return recipe;
                 // Redirect to homepage
               } else {
-                $state.go('app.home');
+                $state.go('app.editor');
               }
             },
             // If an error occurs -> redirect to homepage
-            () => $state.go('app.home')
+            () => $state.go('app.recipe')
           );
           // If new article
         } else {

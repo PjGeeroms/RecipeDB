@@ -66,9 +66,10 @@ export default class User {
     this._$state.go(this._$state.$current, null, { reload: true });
   }
 
-  attemptAuth(credentials) {
+  attemptAuth(type, credentials) {
+    let route = (type === 'login') ? '/login' : '';
     return this._$http({
-      url: this._AppConstants.api + '/users/login',
+      url: this._AppConstants.api + '/users' + route,
       method: 'POST',
       data: {
         user: credentials

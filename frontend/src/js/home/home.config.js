@@ -9,4 +9,6 @@ export default function HomeConfig($stateProvider) {
     templateUrl: 'home/home.html',
     title: 'Home'
   });
+
+
 }

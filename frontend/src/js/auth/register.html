@@ -1,0 +1,51 @@
+<div class="auth-page">
+  <div class="container page">
+    <div class="row">
+      <div class="login-center">
+
+
+        <form ng-submit="$ctrl.submitForm()" id="authentication">
+          <fieldset ng-disabled="$ctrl.isSubmitting">
+            <h1 class="text-center form-header" ng-bind="::$ctrl.title">REGISTER</h1>
+            <fieldset>
+              <span class="error" ng-bind="$ctrl.errors.username"></span>
+              <input
+                type="text"
+                placeholder="USERNAME"
+                ng-model="$ctrl.formData.username" />
+            </fieldset>
+
+            <fieldset>
+              <span class="error" ng-bind="$ctrl.errors.email"></span>
+              <input
+                type="text"
+                placeholder="EMAIL"
+                ng-model="$ctrl.formData.email" />
+            </fieldset>
+
+            <fieldset class="form-group">
+              <span class="error" ng-bind="$ctrl.errors.password"></span>
+              <input
+                type="password"
+                placeholder="PASSWORD"
+                ng-model="$ctrl.formData.password" />
+            </fieldset>
+
+            <fieldset class="form-group">
+              <span class="error" ng-bind="$ctrl.errors.registerKey"></span>
+              <input
+                type="password"
+                placeholder="REGISTER KEY"
+                ng-model="$ctrl.formData.registerKey" />
+            </fieldset>
+
+            <button class="btn btn-lg btn-primary pull-xs-right"
+              type="submit" ng-bind="::$ctrl.title"></button>
+
+          </fieldset>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
