@@ -7,6 +7,8 @@
           <i class="ion-edit edit"
             ui-sref="app.editor({slug: $ctrl.recipe.slug})"
             ng-show="$ctrl.isUser"></i>
+          <i class="ion-trash-b delete"
+            ng-click="$ctrl.deleteRecipe()"></i>
           <div class="wrapper">
             <div class="primary-info">
               <h1 ng-bind="$ctrl.recipe.title"></h1>

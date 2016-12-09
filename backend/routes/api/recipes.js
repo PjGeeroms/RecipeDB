@@ -19,7 +19,7 @@ router.param('recipe', function(req, res, next, slug) {
 });
 
 // Get all recipes
-router.get('/', auth.optional, function(req, res, next) {
+router.get('/', auth.required, function(req, res, next) {
   var limit = 20;
   var offset = 0;
 
@@ -37,7 +37,7 @@ router.get('/', auth.optional, function(req, res, next) {
 });
 
 // Get one recipe
-router.get('/:recipe', auth.optional, function (req, res, next){
+router.get('/:recipe', auth.required, function (req, res, next){
   Promise.all([
     req.payload ? User.findById(req.payload.id) : null,
     req.recipe.populate('author').execPopulate()
@@ -49,7 +49,7 @@ router.get('/:recipe', auth.optional, function (req, res, next){
 
 
 // Get recipes filtered
-router.get('/filter/:filtered', auth.optional, function(req, res){
+router.get('/filter/:filtered', auth.required, function(req, res){
   var filter = req.params.filtered;
   var limit = 5;
 
@@ -120,7 +120,7 @@ router.put('/:recipe', auth.required, function(req, res, next) {
 // delete recipe
 router.delete('/:recipe', auth.required, function(req, res, next) {
   User.findById(req.payload.id).then(function(){
-    if(req.recipe.author.toString() === req.payload.id.toString()){
+    if(req.recipe.author._id.toString() === req.payload.id.toString()){
       return req.recipe.remove().then(function(){
         return res.sendStatus(204);
       });

@@ -5,6 +5,7 @@ class AppHeaderCtrl {
     this.appName = AppConstants.appName;
     this.logout = User.logout.bind(User);
     this.state = $state.current.name.replace('app.', '');
+    this.user = User.current;
   }
 }
 

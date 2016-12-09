@@ -439,6 +439,7 @@ body
       width: 90%
 
   .recipe-details
+    cursor: pointer
     height: calc(100vh - 450px)
     padding: 50px 0 0
     background: #363636
@@ -449,6 +450,25 @@ body
 
     @media screen and (max-width: 770px)
       height: calc(100vh - 300px)
+
+
+    .delete
+      position: absolute
+      bottom: 0
+      right: 0
+      background: #EF4836
+      font-size: 3rem
+      padding: 8px 18px
+      border-style: none
+      color: $color-white
+      font-family: "Raleway", "Roboto", sans-serif
+      transition: all 1s ease
+      cursor: pointer
+
+      &:hover
+        background-color: $color-veryLightGray
+        color: $editorBlack
+
 
     &:hover
       .edit

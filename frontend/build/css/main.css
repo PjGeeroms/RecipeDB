@@ -395,6 +395,7 @@ body {
         max-width: none;
         width: 90%; } }
   .recipe-detail .recipe-details {
+    cursor: pointer;
     height: calc(100vh - 450px);
     padding: 50px 0 0;
     background: #363636;
@@ -405,6 +406,21 @@ body {
     @media screen and (max-width: 770px) {
       .recipe-detail .recipe-details {
         height: calc(100vh - 300px); } }
+    .recipe-detail .recipe-details .delete {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background: #EF4836;
+      font-size: 3rem;
+      padding: 8px 18px;
+      border-style: none;
+      color: #fff;
+      font-family: "Raleway", "Roboto", sans-serif;
+      transition: all 1s ease;
+      cursor: pointer; }
+      .recipe-detail .recipe-details .delete:hover {
+        background-color: #f3f3f3;
+        color: #383838; }
     .recipe-detail .recipe-details:hover .edit {
       opacity: 1; }
     .recipe-detail .recipe-details .close {

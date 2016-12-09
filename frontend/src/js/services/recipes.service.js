@@ -59,7 +59,7 @@ export default class Recipes {
 
     return this._$http(request).then(
       (res) => res.data,
-      (err) => console.log("Error getting recipes!: " + err)
+      (err) => err.data
     );
   }
 
@@ -70,7 +70,18 @@ export default class Recipes {
 
     return this._$http(request).then(
       (res) => res.data,
-      (err) => console.log("Error getting recipes by filter: " + err)
+      (err) => err.data
     )
+  }
+
+  deleteRecipe(recipe) {
+    let request = {};
+    request.url = `${this._AppConstants.api}/recipes/` + recipe.slug;
+    request.method = 'DELETE';
+
+    return this._$http(request).then(
+      (res) => console.log(res),
+      (err) => err.data
+    );
   }
 }
