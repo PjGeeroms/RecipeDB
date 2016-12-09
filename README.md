@@ -11,9 +11,7 @@ The project makes use of the following:
 * Gulp
 
 ## How to run
-you can find a live example of the app at:
-
-    http://www.recipedb.pw
+you can find a live example of the app at: http://www.recipedb.pw
 
 you are free to register using the register key: 
 
