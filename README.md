@@ -11,6 +11,16 @@ The project makes use of the following:
 * Gulp
 
 ## How to run
+you can find a live example of the app at:
+
+    http://www.recipedb.pw
+
+you are free to register using the register key: 
+
+    pass
+
+or run the app local by following the next steps.
+
 ### 1. Start mongoDB
     sudo mongod
 
