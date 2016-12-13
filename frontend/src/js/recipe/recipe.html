@@ -26,7 +26,7 @@
           <a ui-sref="app.recipedetail({slug: recipe.slug})"></a>
           <div class="recipe-info">
             <h5 class="recipe-title">
-              <span ng-bind="recipe.title"></span>
+              <span ng-bind="::recipe.title"></span>
             </h5>
             <span class="recipe-source" ng-bind="recipe.author.username"></span>
             <p class="recipe-ingredients"

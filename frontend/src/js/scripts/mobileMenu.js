@@ -7,7 +7,6 @@ angular.element(document).ready(function(){
   }
 
   angular.element(window).resize(function(){
-      console.log(window.innerWidth);
       if (window.innerWidth < 775) {
         angular.element("#mobileMenu").removeClass('hidden');
         angular.element('.nav').addClass('hidden');

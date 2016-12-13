@@ -12,12 +12,14 @@ class AuthController {
       username: "",
       email: "",
       password: "",
+      passwordRe: "",
       registerKey: ""
     }
     this.errors = {
       username: "",
       email: "",
       password: "",
+      passwordRe: "",
       registerKey: ""
     };
   }
@@ -53,6 +55,12 @@ class AuthController {
         validForm = false;
       } else {
         this.errors.password = "";
+      }
+      if (!(this.formData.password == this.formData.passwordRe) || !(this.formData.passwordRe.length > 0)) {
+        this.errors.passwordRe = "Passwords do not match";
+        validForm = false;
+      } else {
+        this.errors.passwordRe = "";
       }
       if(!validForm) {
         return;

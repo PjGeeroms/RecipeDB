@@ -23,7 +23,7 @@
                 ng-model="$ctrl.formData.email" />
             </fieldset>
 
-            <fieldset class="form-group">
+            <fieldset>
               <span class="error" ng-bind="$ctrl.errors.password"></span>
               <input
                 type="password"
@@ -31,7 +31,15 @@
                 ng-model="$ctrl.formData.password" />
             </fieldset>
 
-            <fieldset class="form-group">
+            <fieldset>
+              <span class="error" ng-bind="$ctrl.errors.passwordRe"></span>
+              <input
+                type="password"
+                placeholder="REPEAT PASSWORD"
+                ng-model="$ctrl.formData.passwordRe" />
+            </fieldset>
+
+            <fieldset>
               <span class="error" ng-bind="$ctrl.errors.registerKey"></span>
               <input
                 type="password"
