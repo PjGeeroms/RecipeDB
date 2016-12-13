@@ -80,7 +80,7 @@ export default class Recipes {
     request.method = 'DELETE';
 
     return this._$http(request).then(
-      (res) => console.log(res),
+      (res) => res.data,
       (err) => err.data
     );
   }

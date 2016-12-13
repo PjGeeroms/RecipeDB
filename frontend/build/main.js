@@ -39040,7 +39040,7 @@ var Recipes = function () {
       request.method = 'DELETE';
 
       return this._$http(request).then(function (res) {
-        return console.log(res);
+        return res.data;
       }, function (err) {
         return err.data;
       });
