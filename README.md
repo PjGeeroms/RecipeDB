@@ -40,3 +40,55 @@ Navigate to the frontend folder and run following commands:
 
 ### 4. Open a browser and navigate to:
     localhost:4000
+
+# RecipeDB API
+De backend van het project vind je terug in de backend folder. 
+Zie 'How to run' om deze op te zetten.
+
+## Users
+
+### GET User
+/users/user
+* Requires: Authentication
+* Returns a single user object
+
+### POST User
+/users/login
+* Returns a user object on success
+* Returns 422 on failure
+
+### POST User [Create user]
+/users
+* Returns a single user
+
+## Recipes
+
+### GET Recipes
+/recipes
+* Requires: Authentication
+* Returns a list of recipes
+
+### GET Recipe
+/recipes/:recipe-slug
+* Requires: Authentication
+* Returns a single recipe
+
+### GET Recipes with filter
+/recipes/filter/:filter
+* Requires: Authentication
+* Returns a list of recipes that matches the filter
+
+### POST Recipes
+/recipes
+* Requires: Authentication, recipe object
+* Returns added recipe object
+
+### PUT Recipes
+/recipes/:recipe-slug
+* Requires: Authentication, recipe object
+* Returns recipe on success
+
+### DELETE Recipes
+/recipes/:recipe-slug
+* Requires: Authentication
+* Returns 204 on success
