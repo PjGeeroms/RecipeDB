@@ -10,14 +10,7 @@ The project makes use of the following:
 * MongoDB
 * Gulp
 
-## How to run
-you can find a live example of the app at: http://www.recipedb.pw
-
-you are free to register using the register key: 
-
-    pass
-
-or run the app local by following the next steps.
+run the app local by following the next steps.
 
 ### 1. Start mongoDB
     sudo mongod
@@ -40,6 +33,15 @@ Navigate to the frontend folder and run following commands:
 
 ### 4. Open a browser and navigate to:
     localhost:4000
+    
+# Creating an account
+For protection of your own recipes the registery page is protected with a secret key. 
+This key is necessary to register.
+The standard key is
+
+    pass
+    
+Of course this key can be changed in the code.
 
 # RecipeDB API
 De backend van het project vind je terug in de backend folder. 
