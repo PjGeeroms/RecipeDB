@@ -41,7 +41,9 @@ The standard key is
 
     pass
     
-Of course this key can be changed in the code.
+Of course this key can be changed in the appConstants file at
+
+    src/js/config/app.constants.js
 
 # RecipeDB API
 De backend van het project vind je terug in de backend folder. 
